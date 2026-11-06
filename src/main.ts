@@ -330,6 +330,7 @@ function buildOutline(content: HTMLElement): HTMLElement | null {
   headings.forEach(heading => {
     const clone = heading.cloneNode(true) as HTMLElement
     clone.querySelector('.wiki-section-count')?.remove()
+    clone.querySelector('.wiki-heading-icon')?.remove()
     const label = clone.textContent?.trim() || heading.id
 
     const item = el('li', { class: 'doc-aside-item' })
@@ -429,7 +430,7 @@ function renderPage() {
 
   const layout = el('div', { class: 'app-layout' })
 
-  const sidebar = Sidebar(categories, sites, state.filters, () => {
+  const sidebar = Sidebar(categories, sites, state.filters, page, () => {
     state.sidebarOpen = false
     saveSidebarOpen(false)
     updateSidebar()

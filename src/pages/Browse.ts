@@ -1,5 +1,5 @@
-import { el } from '../utils/dom'
-import { icon } from '../utils/icons'
+import { el, headingIcon } from '../utils/dom'
+import { icon, icons } from '../utils/icons'
 import { Breadcrumbs } from '../components/ui/Breadcrumbs'
 import { CollectionIndex } from '../components/collection/CollectionIndex'
 import { CollectionSiteRow, CollectionTree } from '../components/collection/CollectionTree'
@@ -52,9 +52,21 @@ function emptyState(
   return empty
 }
 
-function wikiHeader(title: string, description: string, meta?: string): HTMLElement {
+function iconKey(value: string): keyof typeof icons {
+  return (value in icons ? value : 'folder') as keyof typeof icons
+}
+
+function wikiHeader(
+  title: string,
+  description: string,
+  meta?: string,
+  iconName: keyof typeof icons = 'library',
+): HTMLElement {
   const header = el('header', { class: 'wiki-header' })
-  header.appendChild(el('h1', {}, title))
+  const heading = el('h1', {})
+  heading.appendChild(headingIcon(iconName))
+  heading.appendChild(document.createTextNode(title))
+  header.appendChild(heading)
   header.appendChild(el('p', { class: 'wiki-lead' }, description))
   if (meta) header.appendChild(el('p', { class: 'wiki-meta' }, meta))
   return header
@@ -69,6 +81,7 @@ function searchResults(categories: Category[], sites: Site[], favIds: string[]):
 
     const section = el('section', { class: 'wiki-section' })
     const heading = el('h2', { class: 'wiki-section-title', id: `search-${category.id}` })
+    heading.appendChild(headingIcon(iconKey(category.icon)))
     heading.appendChild(el('a', { href: basePath(`/browse?category=${category.id}`) }, category.name))
     heading.appendChild(el('span', { class: 'wiki-section-count' }, pluralize(categorySites.length, 'site')))
     section.appendChild(heading)
@@ -111,7 +124,10 @@ export function BrowsePage(
   page.appendChild(Breadcrumbs(crumbs))
 
   if (filters.category && !category) {
-    page.appendChild(el('h1', {}, 'Wiki not found'))
+    const heading = el('h1', {})
+    heading.appendChild(headingIcon('info'))
+    heading.appendChild(document.createTextNode('Wiki not found'))
+    page.appendChild(heading)
     page.appendChild(emptyState(
       'That page does not exist',
       'The collection you are looking for is not part of this wiki.',
@@ -128,6 +144,7 @@ export function BrowsePage(
       'Search results',
       `Sites matching “${filters.query}” across the wiki.`,
       `${pluralize(visibleSites.length, 'site')} found`,
+      'search',
     ))
 
     if (visibleSites.length === 0) {
@@ -154,6 +171,7 @@ export function BrowsePage(
       'Wiki',
       'A hand-picked directory of anime, manga, reading, gaming and tool resources. Pick a page to see every entry in that section.',
       `${pluralize(sites.length, 'site')} across ${pluralize(categories.length, 'page')}`,
+      'library',
     ))
     page.appendChild(CollectionIndex(categories, sites, false, filters.sort))
     return page
@@ -168,7 +186,7 @@ export function BrowsePage(
     ? `${pluralize(visibleSites.length, 'site')} in ${subcategory.name}`
     : `${pluralize(visibleSites.length, 'site')} across ${pluralize(populatedSections, 'section')}`
 
-  page.appendChild(wikiHeader(pageTitle, category.description, countText))
+  page.appendChild(wikiHeader(pageTitle, category.description, countText, iconKey(category.icon)))
 
   if (visibleSites.length === 0) {
     page.appendChild(emptyState(

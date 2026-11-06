@@ -1,3 +1,5 @@
+import { icons } from './icons'
+
 export function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
   attrs?: Record<string, string | boolean | number | undefined>,
@@ -34,4 +36,16 @@ export function qs<K extends keyof HTMLElementTagNameMap>(sel: string, parent?: 
 
 export function qsa<K extends keyof HTMLElementTagNameMap>(sel: string, parent?: ParentNode): NodeListOf<HTMLElementTagNameMap[K]> {
   return (parent || document).querySelectorAll(sel) as NodeListOf<HTMLElementTagNameMap[K]>
+}
+
+/**
+ * Inline icon used before wiki/about headings instead of a plain glyph.
+ * The surrounding heading keeps its own text so outline/clone logic still works.
+ */
+export function headingIcon(name: keyof typeof icons): HTMLElement {
+  const span = document.createElement('span')
+  span.className = 'wiki-heading-icon'
+  span.setAttribute('aria-hidden', 'true')
+  span.innerHTML = icons[name]
+  return span
 }

@@ -1,4 +1,4 @@
-import { el } from '../../utils/dom'
+import { el, headingIcon } from '../../utils/dom'
 import { icon } from '../../utils/icons'
 import { basePath } from '../../utils/router'
 import { shortDesc } from '../../utils/format'
@@ -105,6 +105,7 @@ export function CollectionTree(
       class: 'wiki-section-title',
       id: `section-${group.id}`,
     })
+    heading.appendChild(headingIcon('folder'))
 
     if (onSelectSubcategory) {
       const link = el('a', {

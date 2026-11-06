@@ -1,7 +1,7 @@
 import { el } from '../../utils/dom'
 import { basePath, navigate } from '../../utils/router'
 import { icon, icons } from '../../utils/icons'
-import type { Category, Site, FilterState } from '../../types'
+import type { Category, Site, FilterState, PageName } from '../../types'
 
 interface SideLink {
   label: string
@@ -43,6 +43,7 @@ export function Sidebar(
   categories: Category[],
   sites: Site[],
   filters: FilterState,
+  currentPage: PageName,
   onClose?: () => void,
 ): HTMLElement {
   const aside = el('aside', { class: 'sidebar app-sidebar', role: 'complementary', 'aria-label': 'Wiki navigation' })
@@ -51,9 +52,9 @@ export function Sidebar(
 
   const topLinks = el('div', { class: 'fmhy-side-top' })
   const topItems: SideLink[] = [
-    { label: 'Home', path: '/', glyph: icon('home') },
-    { label: 'Wiki Index', path: '/browse', glyph: icon('library'), active: !filters.category },
-    { label: 'Favorites', path: '/favorites', glyph: icon('star') },
+    { label: 'Home', path: '/', glyph: icon('home'), active: currentPage === 'home' },
+    { label: 'Wiki Index', path: '/browse', glyph: icon('library'), active: currentPage === 'browse' && !filters.category },
+    { label: 'Favorites', path: '/favorites', glyph: icon('star'), active: currentPage === 'favorites' },
   ]
   topItems.forEach(item => topLinks.appendChild(sideLink(item, onClose)))
   nav.appendChild(topLinks)
@@ -64,18 +65,22 @@ export function Sidebar(
       label: category.name,
       path: `/browse?category=${category.id}`,
       glyph: icon(glyphName),
-      active: filters.category === category.id && !filters.subcategory,
+      active: currentPage === 'browse' && filters.category === category.id,
     }, onClose)
   })
   nav.appendChild(sideGroup('Wiki', true, categoryLinks))
 
-  const toolLinks = [
-    { label: 'Statistics', path: '/dashboard', glyph: icon('barChart3') },
-    { label: 'History', path: '/history', glyph: icon('history') },
+  const toolLinks: SideLink[] = [
+    { label: 'Statistics', path: '/dashboard', glyph: icon('barChart3'), active: currentPage === 'dashboard' },
+    { label: 'History', path: '/history', glyph: icon('history'), active: currentPage === 'history' },
     { label: 'Random site', path: '/random', glyph: icon('arrowRight') },
   ]
   nav.appendChild(sideGroup('Tools', true, toolLinks.map(item => {
-    const link = el('a', { class: 'fmhy-side-link', href: basePath(item.path === '/random' ? '/browse' : item.path) })
+    const link = el('a', {
+      class: `fmhy-side-link${item.active ? ' active' : ''}`,
+      href: basePath(item.path === '/random' ? '/browse' : item.path),
+      'aria-current': item.active ? 'page' : undefined,
+    })
     link.innerHTML = `${item.glyph}<span>${item.label}</span>`
     link.addEventListener('click', (event) => {
       event.preventDefault()
@@ -91,17 +96,18 @@ export function Sidebar(
     return link
   })))
 
-  const moreLinks = [
-    { label: 'About cafs', path: '/about', glyph: icon('info') },
+  const moreLinks: SideLink[] = [
+    { label: 'About cafs', path: '/about', glyph: icon('info'), active: currentPage === 'about' },
     { label: 'GitHub', path: 'https://github.com/6bpr/Pirated-Lib', glyph: icon('github') },
   ]
   nav.appendChild(sideGroup('More', false, moreLinks.map(item => {
     const external = item.path.startsWith('http')
     const link = el('a', {
-      class: 'fmhy-side-link',
+      class: `fmhy-side-link${item.active ? ' active' : ''}`,
       href: external ? item.path : basePath(item.path),
       target: external ? '_blank' : undefined,
       rel: external ? 'noopener' : undefined,
+      'aria-current': item.active ? 'page' : undefined,
     })
     link.innerHTML = `${item.glyph}<span>${item.label}</span>`
     if (!external) {
