@@ -73,7 +73,7 @@
   --parallax-2:     transparent;
   --parallax-3:     transparent;
 
-  --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-body: system-ui, sans-serif;
   --font-mono: ui-monospace, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 
   --text-xs:   0.8125rem;
