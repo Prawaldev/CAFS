@@ -72,6 +72,9 @@ export function DashboardPage(sites: Site[], categories: Category[], recentIds?:
       title: `Open ${site.name} in a new tab`,
       'aria-label': `Open ${site.name} in a new tab`,
     }, site.name)
+    link.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('cafs-visit', { detail: site.id }))
+    })
     item.appendChild(link)
     item.appendChild(el('span', { class: 'wiki-link-desc' }, ` – updated ${relativeTime(site.updatedAt)}`))
     recentList.appendChild(item)

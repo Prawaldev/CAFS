@@ -1,3 +1,4 @@
+import './styles/fonts.css'
 import './styles/tokens.css'
 import './styles/reset.css'
 import './styles/layout.css'
@@ -7,7 +8,7 @@ import './styles/utilities.css'
 import './styles/fmhy.css'
 
 import type { Site, Category, AppState, PageName } from './types'
-import { loadState, saveTheme, saveFavorites, saveHistory, saveRecentSearches, saveSidebarOpen, saveAccentColor, saveBlurEnabled, saveParallaxEnabled, detectSiteChanges, DEFAULT_STATE } from './utils/storage'
+import { loadState, saveTheme, saveFavorites, saveHistory, saveRecentSearches, saveSidebarOpen, saveAccentColor, detectSiteChanges, DEFAULT_STATE } from './utils/storage'
 import { initSearch } from './utils/search'
 import { initRouter, registerRoute, navigate, basePath, stripBase, getCurrentPage, setCurrentPage, getParams } from './utils/router'
 import { initKeyboard, onKey } from './utils/keyboard'
@@ -132,8 +133,6 @@ function toggleTheme() {
 
 function applySettings() {
   const root = document.documentElement
-  root.classList.remove('reduce-blur')
-  root.classList.remove('reduce-parallax')
 
   const accentMap: Record<string, { dark: string; light: string }> = {
     blossom: { dark: '#7bc5e4', light: '#3f7f9e' },
@@ -162,6 +161,17 @@ function adjustColor(hex: string, amount: number): string {
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
 }
 
+function trackVisit(id: string) {
+  const existing = state.history.find(h => h.siteId === id)
+  if (existing) {
+    existing.visitedAt = Date.now()
+    existing.count++
+  } else {
+    state.history.unshift({ siteId: id, visitedAt: Date.now(), count: 1 })
+  }
+  saveHistory(state.history.slice(0, 200))
+}
+
 function toggleFav(id: string) {
   const idx = state.favorites.indexOf(id)
   if (idx >= 0) state.favorites.splice(idx, 1)
@@ -169,6 +179,17 @@ function toggleFav(id: string) {
   saveFavorites(state.favorites)
   renderPage()
 }
+
+// Wiki rows and sidebar links announce their own actions so any page can
+// record visits / favorite toggles without threading callbacks through.
+window.addEventListener('cafs-visit', (e) => {
+  const id = (e as CustomEvent<string>).detail
+  trackVisit(id)
+})
+window.addEventListener('cafs-fav', (e) => {
+  const id = (e as CustomEvent<string>).detail
+  toggleFav(id)
+})
 
 function toggleSidebar() {
   state.sidebarOpen = !state.sidebarOpen
@@ -432,7 +453,7 @@ function renderPage() {
   }
 
   main.appendChild(doc)
-  main.appendChild(Footer(sites.length))
+  main.appendChild(Footer())
   layout.appendChild(main)
 
   const navbarSlot = document.querySelector('#navbar-slot') as HTMLElement | null

@@ -34,8 +34,6 @@ export const DEFAULT_STATE: AppState = {
   recentSearches: [],
   sidebarOpen: true,
   accentColor: 'blossom',
-  blurEnabled: false,
-  parallaxEnabled: false,
 }
 
 export function loadState(): AppState {
@@ -49,8 +47,6 @@ export function loadState(): AppState {
     recentSearches: get<string[]>('recent-searches', []),
     sidebarOpen: get<boolean>('sidebar-open', true),
     accentColor: storedAccent === 'amber' ? 'blossom' : storedAccent,
-    blurEnabled: get<boolean>('blur-enabled', false),
-    parallaxEnabled: get<boolean>('parallax-enabled', false),
   }
 }
 
@@ -80,14 +76,6 @@ export function saveSidebarOpen(open: boolean) {
 
 export function saveAccentColor(color: string) {
   set('accent-color', color)
-}
-
-export function saveBlurEnabled(enabled: boolean) {
-  set('blur-enabled', enabled)
-}
-
-export function saveParallaxEnabled(enabled: boolean) {
-  set('parallax-enabled', enabled)
 }
 
 function siteFingerprint(s: Site): string {

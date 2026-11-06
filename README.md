@@ -1,8 +1,8 @@
-# caps
+# cafs
 
 A curated index of the best anime resources on the internet.
 
-**caps** is a wiki-style discovery hub for anime, manga, reading, gaming, and tool resources. Every site is hand-picked, reviewed, and kept up to date.
+**cafs** is a wiki-style discovery hub for anime, manga, reading, gaming, and tool resources. Every site is hand-picked, reviewed, and kept up to date.
 
 ## Features
 
@@ -48,7 +48,7 @@ npm run typecheck
 ## Project Structure
 
 ```
-caps/
+cafs/
 ├── index.html              # Entry point
 ├── public/
 │   ├── 404.html            # SPA fallback for GitHub Pages

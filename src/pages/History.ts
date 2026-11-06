@@ -73,6 +73,9 @@ export function HistoryPage(
         title: `Open ${site.name} in a new tab`,
         'aria-label': `Open ${site.name} in a new tab`,
       }, site.name)
+      nameLink.addEventListener('click', () => {
+        window.dispatchEvent(new CustomEvent('cafs-visit', { detail: site.id }))
+      })
       item.appendChild(nameLink)
 
       item.appendChild(el('span', { class: 'wiki-link-desc' },
@@ -87,6 +90,9 @@ export function HistoryPage(
         'aria-label': `Open ${site.name} in a new tab`,
       })
       ext.innerHTML = icon('externalLink')
+      ext.addEventListener('click', () => {
+        window.dispatchEvent(new CustomEvent('cafs-visit', { detail: site.id }))
+      })
       item.appendChild(ext)
       list.appendChild(item)
     })

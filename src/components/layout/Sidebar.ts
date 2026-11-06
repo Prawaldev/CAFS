@@ -81,6 +81,7 @@ export function Sidebar(
       event.preventDefault()
       if (item.path === '/random' && sites.length > 0) {
         const site = sites[Math.floor(Math.random() * sites.length)]
+        window.dispatchEvent(new CustomEvent('cafs-visit', { detail: site.id }))
         window.open(site.url, '_blank', 'noopener,noreferrer')
       } else {
         navigate(item.path)

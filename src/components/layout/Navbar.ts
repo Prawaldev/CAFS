@@ -58,7 +58,7 @@ export function Navbar(currentPage: PageName, theme: 'dark' | 'light', callbacks
     { id: 'about', label: 'About', path: '/about' },
   ]
   const isActive = (id: PageName) => {
-    if (id === 'browse') return currentPage === 'browse' || currentPage === 'site'
+    if (id === 'browse') return currentPage === 'browse'
     return currentPage === id
   }
   navPages.forEach(p => {

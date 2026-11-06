@@ -1,7 +1,8 @@
 import { el } from '../utils/dom'
 import { icon, icons } from '../utils/icons'
-import { pluralize, shortDesc } from '../utils/format'
+import { pluralize } from '../utils/format'
 import { navigate, basePath } from '../utils/router'
+import { CollectionSiteRow } from '../components/collection/CollectionTree'
 import type { Site, Category } from '../types'
 
 const featureColors: Record<string, string> = {
@@ -34,7 +35,7 @@ const featureIcons: Record<string, keyof typeof icons> = {
   nsfw: 'star',
 }
 
-export function HomePage(sites: Site[], categories: Category[], _favIds: string[], _recentIds?: Set<string>): HTMLElement {
+export function HomePage(sites: Site[], categories: Category[], favIds: string[], _recentIds?: Set<string>): HTMLElement {
   const page = el('div', { class: 'home-page vp-home' })
 
   const hero = el('section', { class: 'vp-hero' })
@@ -117,31 +118,7 @@ export function HomePage(sites: Site[], categories: Category[], _favIds: string[
     const list = el('ul', { class: 'wiki-link-list wiki-link-list-home' })
     const sorted = [...sites].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 12)
     sorted.forEach(site => {
-      const item = el('li', { class: 'wiki-link-item' })
-
-      const nameLink = el('a', {
-        class: 'wiki-link-name',
-        href: site.url,
-        target: '_blank',
-        rel: 'noopener noreferrer',
-        title: `Open ${site.name} in a new tab`,
-        'aria-label': `Open ${site.name} in a new tab`,
-      }, site.name)
-      item.appendChild(nameLink)
-
-      item.appendChild(el('span', { class: 'wiki-link-desc' }, ` – ${shortDesc(site.description, 150)}`))
-
-      const ext = el('a', {
-        class: 'wiki-link-ext',
-        href: site.url,
-        target: '_blank',
-        rel: 'noopener noreferrer',
-        title: `Open ${site.name} in a new tab`,
-        'aria-label': `Open ${site.name} in a new tab`,
-      })
-      ext.innerHTML = icon('externalLink')
-      item.appendChild(ext)
-      list.appendChild(item)
+      list.appendChild(CollectionSiteRow(site, favIds.includes(site.id)))
     })
     latest.appendChild(list)
 

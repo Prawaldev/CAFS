@@ -39,6 +39,10 @@ function groupSites(sites: Site[], category: Category): SiteGroup[] {
   })
 }
 
+function emitVisit(siteId: string) {
+  window.dispatchEvent(new CustomEvent('cafs-visit', { detail: siteId }))
+}
+
 export function CollectionSiteRow(site: Site, isFav: boolean): HTMLElement {
   const item = el('li', {
     class: 'wiki-link-item',
@@ -52,13 +56,21 @@ export function CollectionSiteRow(site: Site, isFav: boolean): HTMLElement {
     title: `Open ${site.name} in a new tab`,
     'aria-label': `Open ${site.name} in a new tab`,
   }, site.name)
+  nameLink.addEventListener('click', () => emitVisit(site.id))
   item.appendChild(nameLink)
 
-  if (isFav) {
-    const fav = el('span', { class: 'wiki-link-fav', title: 'Favourite' })
-    fav.innerHTML = icon('starFilled')
-    item.appendChild(fav)
-  }
+  const fav = el('button', {
+    class: `wiki-link-fav${isFav ? ' active' : ''}`,
+    type: 'button',
+    title: isFav ? `Remove ${site.name} from favorites` : `Save ${site.name} to favorites`,
+    'aria-label': isFav ? `Remove ${site.name} from favorites` : `Save ${site.name} to favorites`,
+    'aria-pressed': isFav ? 'true' : 'false',
+  })
+  fav.innerHTML = icon(isFav ? 'starFilled' : 'star')
+  fav.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('cafs-fav', { detail: site.id }))
+  })
+  item.appendChild(fav)
 
   item.appendChild(el('span', { class: 'wiki-link-desc' }, ` – ${shortDesc(site.description, 180)}`))
 
@@ -71,6 +83,7 @@ export function CollectionSiteRow(site: Site, isFav: boolean): HTMLElement {
     'aria-label': `Open ${site.name} in a new tab`,
   })
   ext.innerHTML = icon('externalLink')
+  ext.addEventListener('click', () => emitVisit(site.id))
   item.appendChild(ext)
 
   return item

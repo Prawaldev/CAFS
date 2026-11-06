@@ -1,6 +1,6 @@
 import { el } from '../../utils/dom'
 
-export function Footer(siteCount: number): HTMLElement {
+export function Footer(): HTMLElement {
   const footer = el('footer', { class: 'footer' })
   const left = el('span', { class: 'footer-brand' })
   left.innerHTML = ''

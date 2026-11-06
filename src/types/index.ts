@@ -37,8 +37,6 @@ export interface AppState {
   recentSearches: string[]
   sidebarOpen: boolean
   accentColor: string
-  blurEnabled: boolean
-  parallaxEnabled: boolean
 }
 
 export interface FilterState {

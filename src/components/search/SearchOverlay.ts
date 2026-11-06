@@ -107,6 +107,7 @@ export function SearchOverlay(
         row.appendChild(meta)
 
         row.addEventListener('click', () => {
+          window.dispatchEvent(new CustomEvent('cafs-visit', { detail: item.id }))
           onClose()
           window.open(item.url, '_blank', 'noopener,noreferrer')
         })
