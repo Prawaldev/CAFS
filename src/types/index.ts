@@ -10,6 +10,7 @@ export interface Site {
   language: string
   requires: string
   curatorNote: string
+  featured?: boolean
   addedAt: string
   updatedAt: string
 }
@@ -34,7 +35,6 @@ export interface AppState {
   favorites: string[]
   history: HistoryEntry[]
   recentSearches: string[]
-  siteNotes: Record<string, string>
   sidebarOpen: boolean
   accentColor: string
   blurEnabled: boolean
@@ -57,4 +57,4 @@ export interface HistoryEntry {
   count: number
 }
 
-export type PageName = 'home' | 'browse' | 'site' | 'favorites' | 'history' | 'dashboard' | 'about'
+export type PageName = 'home' | 'browse' | 'favorites' | 'history' | 'dashboard' | 'about'

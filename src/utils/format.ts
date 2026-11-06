@@ -33,26 +33,3 @@ export function shortDesc(desc: string, maxLen = 120): string {
   return desc.slice(0, maxLen).replace(/\s+\S*$/, '') + '…'
 }
 
-export function faviconUrl(url: string): string {
-  const domain = domainFromUrl(url)
-  return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
-}
-
-export function preloadFavicons(urls: string[]) {
-  const fn = () => {
-    for (let i = 0; i < urls.length; i += 10) {
-      setTimeout(() => {
-        const batch = urls.slice(i, i + 10)
-        batch.forEach(url => {
-          const img = new Image()
-          img.src = faviconUrl(url)
-        })
-      }, i * 50)
-    }
-  }
-  if ('requestIdleCallback' in window) {
-    requestIdleCallback(fn)
-  } else {
-    setTimeout(fn, 500)
-  }
-}

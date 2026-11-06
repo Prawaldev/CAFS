@@ -1,20 +1,18 @@
-# Piralib v1
+# caps
 
 A curated index of the best anime resources on the internet.
 
-**Piralib** is a premium curated anime discovery platform — an archive and discovery hub for the best anime resources on the web. Every site is hand-picked, reviewed, and maintained by enthusiasts.
+**caps** is a wiki-style discovery hub for anime, manga, reading, gaming, and tool resources. Every site is hand-picked, reviewed, and kept up to date.
 
 ## Features
 
-- **550+ curated sites** across 5 categories (Anime, Manga, Novels, Hentai, Tools)
+- **560+ curated sites** across 12 pages (Anime, Manga, Novels, Tokusatsu, Comics, Software, Music, Tools, Misc, Art, Games, NSFW)
 - **Instant fuzzy search** powered by Fuse.js (Ctrl+K to open)
-- **Advanced filtering** by category, subcategory, tags, status
-- **Multiple view modes**: grid, list, compact
+- **Wiki index and link lists** with a right-side “On this page” outline
 - **Favorites** — save sites to your personal list (localStorage)
 - **Browsing history** — recently visited sites with timestamps (localStorage)
 - **Personal notes** — private annotations per site (localStorage)
-- **Site health monitoring** — client-side status checking with cached results
-- **Statistics dashboard** with health breakdown, category distribution, tag cloud
+- **Statistics dashboard** with category distribution and a tag cloud
 - **Dark & light mode** with persistent preference
 - **Keyboard-first navigation** with command palette search
 
@@ -50,38 +48,36 @@ npm run typecheck
 ## Project Structure
 
 ```
-anilib/
+caps/
 ├── index.html              # Entry point
 ├── public/
 │   ├── 404.html            # SPA fallback for GitHub Pages
 │   ├── data/               # Static JSON data
 │   │   ├── sites.json
 │   │   └── categories.json
-│   └── images/             # Site screenshots and icons
+│   └── favicon_io/         # Local icons
 ├── src/
 │   ├── types/              # TypeScript interfaces
 │   ├── utils/              # Utilities (router, search, storage, etc.)
 │   ├── components/         # UI components
-│   │   ├── ui/             # Primitives (StatusDot, Tag, Badge, Breadcrumbs)
-│   │   ├── layout/         # Layout (Navbar, Sidebar, Footer, FilterBar)
-│   │   ├── site/           # Site-specific (SiteCard, SiteListItem, SiteDetail)
+│   │   ├── collection/     # Wiki index and link-list renderers
+│   │   ├── ui/             # Primitives (Tag, Breadcrumbs)
+│   │   ├── layout/         # Layout (Navbar, Sidebar, Footer)
+│   │   ├── site/           # Site-specific components
 │   │   ├── search/         # Search overlay
 │   │   └── stats/          # Stats components
 │   ├── pages/              # Page renderers (Home, Browse, SiteDetail, etc.)
-│   ├── styles/             # CSS (tokens, reset, layout, components, pages)
+│   ├── styles/             # CSS (tokens, reset, layout, components, pages, fmhy)
 │   └── main.ts             # Entry point
 ├── scripts/
 │   └── migrate-data.js     # Data migration tool
-├── data.js                 # Legacy data file
-├── app.js                  # Legacy app file
-├── style.css               # Legacy styles
 └── README.md
 ```
 
 ## Adding Sites
 
-All site data lives in `public/data/sites.json`. Categories in `public/data/categories.json`.
-Simply edit the JSON files and rebuild.
+All site data lives in `public/data/sites.json`. Categories live in `public/data/categories.json`.
+Edit the JSON files and rebuild.
 
 ## Deployment
 
@@ -89,4 +85,3 @@ Simply edit the JSON files and rebuild.
 npm run build
 # Deploy dist/ to GitHub Pages
 ```
-

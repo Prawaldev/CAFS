@@ -11,99 +11,103 @@ export interface NavbarCallbacks {
 }
 
 export function Navbar(currentPage: PageName, theme: 'dark' | 'light', callbacks: NavbarCallbacks): HTMLElement {
-  const nav = el('nav', { class: 'navbar', role: 'navigation' })
+  const header = el('header', { class: 'navbar', role: 'banner' })
+  const inner = el('div', { class: 'navbar-inner' })
 
-  const logo = el('span', { class: 'navbar-logo' })
-  const favImg = el('img', { src: basePath('/favicon_io/favicon.svg'), class: 'navbar-favicon', alt: '', width: '24', height: '24' })
-  logo.appendChild(favImg)
-  logo.appendChild(document.createTextNode(' Piralib'))
-  const tag = el('span', { class: 'navbar-tag' }, 'v2')
-  logo.appendChild(tag)
-  logo.addEventListener('click', () => navigate('/'))
-  nav.appendChild(logo)
+  if (callbacks.onSidebarToggle) {
+    const menuBtn = el('button', {
+      class: 'navbar-menu-btn',
+      type: 'button',
+      'aria-label': 'Open navigation menu',
+      title: 'Menu',
+    })
+    menuBtn.innerHTML = `<span class="navbar-menu-icon">${icon('menu')}</span><span class="navbar-menu-text">Menu</span>`
+    menuBtn.addEventListener('click', () => callbacks.onSidebarToggle!())
+    inner.appendChild(menuBtn)
+  }
 
-  const links = el('div', { class: 'navbar-links' })
-  const navPages: Array<{ id: PageName; label: string; icon: string; path: string }> = [
-    { id: 'home', label: 'Home', icon: icon('home'), path: '/' },
-    { id: 'browse', label: 'Browse', icon: icon('search'), path: '/browse' },
-    { id: 'dashboard', label: 'Dashboard', icon: icon('barChart3'), path: '/dashboard' },
-    { id: 'about', label: 'About', icon: icon('info'), path: '/about' },
+  const logo = el('a', {
+    class: 'navbar-logo',
+    href: basePath('/'),
+    'aria-label': 'cafs home',
+  })
+  logo.innerHTML = `<img src="${basePath('/favicon_io/favicon.svg')}" class="navbar-favicon" alt="" width="24" height="24"><span class="navbar-logo-text">cafs</span>`
+  logo.addEventListener('click', (e) => {
+    e.preventDefault()
+    navigate('/')
+  })
+  inner.appendChild(logo)
+
+  const searchBtn = el('button', {
+    class: 'navbar-search',
+    type: 'button',
+    'aria-label': 'Search the wiki',
+    title: 'Search (Ctrl+K)',
+  })
+  searchBtn.innerHTML = `${icon('search')}<span class="navbar-search-label">Search</span><kbd>Ctrl K</kbd>`
+  searchBtn.addEventListener('click', () => callbacks.onSearchOpen())
+  inner.appendChild(searchBtn)
+
+  inner.appendChild(el('div', { class: 'navbar-spacer' }))
+
+  const links = el('nav', { class: 'navbar-links', 'aria-label': 'Primary navigation' })
+  const navPages: Array<{ id: PageName; label: string; path: string }> = [
+    { id: 'browse', label: 'Wiki', path: '/browse' },
+    { id: 'favorites', label: 'Favorites', path: '/favorites' },
+    { id: 'dashboard', label: 'Stats', path: '/dashboard' },
+    { id: 'about', label: 'About', path: '/about' },
   ]
+  const isActive = (id: PageName) => {
+    if (id === 'browse') return currentPage === 'browse' || currentPage === 'site'
+    return currentPage === id
+  }
   navPages.forEach(p => {
     const a = el('a', {
-      class: `navbar-link${currentPage === p.id ? ' active' : ''}`,
+      class: `navbar-link${isActive(p.id) ? ' active' : ''}`,
       href: basePath(p.path),
-    })
-    a.innerHTML = `<span class="icon">${p.icon}</span> ${p.label}`
+    }, p.label)
     a.addEventListener('click', (e) => {
       e.preventDefault()
       navigate(p.path)
     })
     links.appendChild(a)
   })
-  nav.appendChild(links)
-
-  const navMenu = el('div', { class: 'navbar-menu hide-desktop' })
-
-  const burgerBtn = el('button', { class: 'navbar-hamburger', 'aria-label': 'Navigation menu', 'aria-expanded': 'false' })
-  burgerBtn.innerHTML = `<span class="hamburger-container"><span class="hamburger-top"></span><span class="hamburger-middle"></span><span class="hamburger-bottom"></span></span>`
-
-  const dropdown = el('div', { class: 'navbar-dropdown' })
-
-  burgerBtn.addEventListener('click', () => {
-    const isOpen = dropdown.classList.toggle('open')
-    burgerBtn.classList.toggle('active', isOpen)
-    burgerBtn.setAttribute('aria-expanded', String(isOpen))
-  })
-
-  document.addEventListener('click', (e) => {
-    if (!navMenu.contains(e.target as Node)) {
-      dropdown.classList.remove('open')
-      burgerBtn.classList.remove('active')
-      burgerBtn.setAttribute('aria-expanded', 'false')
-    }
-  }, { capture: true })
-
-  navMenu.appendChild(burgerBtn)
-  navMenu.appendChild(dropdown)
-  nav.appendChild(navMenu)
-
-  nav.appendChild(el('div', { class: 'navbar-spacer' }))
+  inner.appendChild(links)
 
   const actions = el('div', { class: 'navbar-actions' })
 
-  const searchBtn = el('button', { class: 'navbar-search-btn' })
-  searchBtn.innerHTML = `${icon('search')} Search`
-  searchBtn.appendChild(el('kbd', {}, 'Ctrl+K'))
-  searchBtn.addEventListener('click', () => callbacks.onSearchOpen())
-  actions.appendChild(searchBtn)
-
-  const themeBtn = el('button', { class: 'navbar-btn-icon', title: `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode` })
+  const themeBtn = el('button', {
+    class: 'navbar-btn-icon',
+    type: 'button',
+    title: `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`,
+    'aria-label': `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`,
+  })
   themeBtn.innerHTML = theme === 'dark' ? icon('sun') : icon('moon')
   themeBtn.addEventListener('click', () => callbacks.onThemeToggle())
   actions.appendChild(themeBtn)
 
-  const settingsBtn = el('button', { class: 'navbar-btn-icon', title: 'Settings' })
+  const settingsBtn = el('button', {
+    class: 'navbar-btn-icon',
+    type: 'button',
+    title: 'Appearance',
+    'aria-label': 'Appearance settings',
+  })
   settingsBtn.innerHTML = icon('settings')
   settingsBtn.addEventListener('click', () => callbacks.onSettingsOpen?.())
   actions.appendChild(settingsBtn)
 
-  const githubBtn = el('a', { class: 'navbar-btn-icon', href: 'https://github.com/6bpr/Pirated-Lib', target: '_blank', rel: 'noopener', title: 'GitHub' })
+  const githubBtn = el('a', {
+    class: 'navbar-btn-icon navbar-github',
+    href: 'https://github.com/6bpr/Pirated-Lib',
+    target: '_blank',
+    rel: 'noopener',
+    title: 'GitHub',
+    'aria-label': 'GitHub repository',
+  })
   githubBtn.innerHTML = icon('github')
   actions.appendChild(githubBtn)
 
-  const favBtn = el('button', { class: 'navbar-btn-icon', title: 'Favorites' })
-  favBtn.innerHTML = icon('star')
-  favBtn.addEventListener('click', () => navigate('/favorites'))
-  actions.appendChild(favBtn)
-
-  if (callbacks.onSidebarToggle) {
-    const sidebarBtn = el('button', { class: 'navbar-btn-icon hide-desktop', title: 'Toggle sidebar' })
-    sidebarBtn.innerHTML = icon('menu')
-    sidebarBtn.addEventListener('click', () => callbacks.onSidebarToggle!())
-    nav.insertBefore(sidebarBtn, logo)
-  }
-
-  nav.appendChild(actions)
-  return nav
+  inner.appendChild(actions)
+  header.appendChild(inner)
+  return header
 }

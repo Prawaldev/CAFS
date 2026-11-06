@@ -1,19 +1,15 @@
 import { el } from '../../utils/dom'
 import { icon } from '../../utils/icons'
 import { Tag } from '../ui/Tag'
-import { shortDesc, faviconUrl } from '../../utils/format'
-import { navigate } from '../../utils/router'
+import { shortDesc } from '../../utils/format'
 import type { Site } from '../../types'
 
 export function SiteCard(site: Site, isFav: boolean): HTMLElement {
   const card = el('article', { class: 'site-card', role: 'article' })
 
-  const logo = el('img', { class: 'site-card-logo', src: faviconUrl(site.url), alt: '', width: '40', height: '40', loading: 'lazy' })
-
   const body = el('div', { class: 'site-card-body' })
 
   const header = el('div', { class: 'site-card-header' })
-  header.appendChild(logo)
   const name = el('span', { class: 'site-card-name' }, site.name)
   header.appendChild(name)
   if (isFav) {
@@ -35,9 +31,9 @@ export function SiteCard(site: Site, isFav: boolean): HTMLElement {
 
   card.appendChild(body)
 
-  card.addEventListener('click', () => navigate(`/site?id=${site.id}`))
+  card.addEventListener('click', () => window.open(site.url, '_blank', 'noopener,noreferrer'))
   card.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') navigate(`/site?id=${site.id}`)
+    if (e.key === 'Enter') window.open(site.url, '_blank', 'noopener,noreferrer')
   })
   card.setAttribute('tabindex', '0')
   card.setAttribute('aria-label', `View details for ${site.name}`)

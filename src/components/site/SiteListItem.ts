@@ -1,15 +1,10 @@
 import { el } from '../../utils/dom'
 import { icon } from '../../utils/icons'
 import { Tag } from '../ui/Tag'
-import { navigate } from '../../utils/router'
-import { faviconUrl } from '../../utils/format'
 import type { Site } from '../../types'
 
 export function SiteListItem(site: Site, isFav: boolean): HTMLElement {
   const item = el('div', { class: 'site-list-item', tabindex: '0', role: 'button' })
-
-  const logo = el('img', { class: 'site-list-logo', src: faviconUrl(site.url), alt: '', width: '36', height: '36', loading: 'lazy' })
-  item.appendChild(logo)
 
   const info = el('div', { class: 'site-list-info' })
   const nameLine = el('div', { class: 'site-list-name' })
@@ -27,8 +22,8 @@ export function SiteListItem(site: Site, isFav: boolean): HTMLElement {
   site.tags.slice(0, 3).forEach(t => tags.appendChild(Tag(t)))
   item.appendChild(tags)
 
-  item.addEventListener('click', () => navigate(`/site?id=${site.id}`))
-  item.addEventListener('keydown', (e) => { if (e.key === 'Enter') navigate(`/site?id=${site.id}`) })
+  item.addEventListener('click', () => window.open(site.url, '_blank', 'noopener,noreferrer'))
+  item.addEventListener('keydown', (e) => { if (e.key === 'Enter') window.open(site.url, '_blank', 'noopener,noreferrer') })
 
   return item
 }

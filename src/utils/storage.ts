@@ -32,11 +32,10 @@ export const DEFAULT_STATE: AppState = {
   favorites: [],
   history: [],
   recentSearches: [],
-  siteNotes: {},
   sidebarOpen: true,
   accentColor: 'blossom',
-  blurEnabled: true,
-  parallaxEnabled: true,
+  blurEnabled: false,
+  parallaxEnabled: false,
 }
 
 export function loadState(): AppState {
@@ -48,11 +47,10 @@ export function loadState(): AppState {
     favorites: get<string[]>('favorites', []),
     history: get<HistoryEntry[]>('history', []),
     recentSearches: get<string[]>('recent-searches', []),
-    siteNotes: get<Record<string, string>>('site-notes', {}),
     sidebarOpen: get<boolean>('sidebar-open', true),
     accentColor: storedAccent === 'amber' ? 'blossom' : storedAccent,
-    blurEnabled: get<boolean>('blur-enabled', true),
-    parallaxEnabled: get<boolean>('parallax-enabled', true),
+    blurEnabled: get<boolean>('blur-enabled', false),
+    parallaxEnabled: get<boolean>('parallax-enabled', false),
   }
 }
 
@@ -74,10 +72,6 @@ export function saveHistory(entries: HistoryEntry[]) {
 
 export function saveRecentSearches(searches: string[]) {
   set('recent-searches', searches)
-}
-
-export function saveSiteNotes(notes: Record<string, string>) {
-  set('site-notes', notes)
 }
 
 export function saveSidebarOpen(open: boolean) {

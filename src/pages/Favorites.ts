@@ -1,27 +1,26 @@
 import { el } from '../utils/dom'
-import { icon } from '../utils/icons'
-import { SiteCard } from '../components/site/SiteCard'
-import { SiteListItem } from '../components/site/SiteListItem'
 import { Breadcrumbs } from '../components/ui/Breadcrumbs'
-import { navigate } from '../utils/router'
-import type { Site } from '../types'
+import { CollectionSiteRow } from '../components/collection/CollectionTree'
+import { pluralize } from '../utils/format'
+import { basePath, navigate } from '../utils/router'
+import type { Site, Category } from '../types'
 
 export function FavoritesPage(
   favSites: Site[],
-  view: 'grid' | 'list' | 'compact',
+  categories: Category[],
   exportFavs: () => void,
 ): HTMLElement {
-  const page = el('div', {})
+  const page = el('div', { class: 'wiki-page' })
 
   page.appendChild(Breadcrumbs([
     { label: 'Home', href: '/' },
     { label: 'Favorites' },
   ]))
 
-  const header = el('div', { class: 'favorites-header' })
-  header.innerHTML = `${icon('star', 24)} Favorites (${favSites.length})`
+  const header = el('div', { class: 'page-header' })
+  header.appendChild(el('h1', {}, 'Favorites'))
   if (favSites.length > 0) {
-    const exportBtn = el('button', { class: 'btn btn-secondary' }, 'Export JSON')
+    const exportBtn = el('button', { class: 'btn btn-secondary', type: 'button' }, 'Export JSON')
     exportBtn.addEventListener('click', exportFavs)
     header.appendChild(exportBtn)
   }
@@ -29,36 +28,49 @@ export function FavoritesPage(
 
   if (favSites.length === 0) {
     const empty = el('div', { class: 'empty-state' })
-    empty.innerHTML = `<div class="icon">${icon('star', 32)}</div>`
     empty.appendChild(el('div', { class: 'empty-state-title' }, 'No favorites yet'))
-    empty.appendChild(el('div', { class: 'empty-state-desc' }, 'Save your favorite sites for quick access.'))
-    const browseBtn = el('button', { class: 'btn btn-primary' })
-    browseBtn.innerHTML = `Browse Sites ${icon('arrowRight')}`
+    empty.appendChild(el('div', { class: 'empty-state-desc' }, 'Save sites from any wiki page and they will show up here.'))
+    const browseBtn = el('button', { class: 'btn btn-secondary', type: 'button' }, 'Browse the wiki')
     browseBtn.addEventListener('click', () => navigate('/browse'))
     empty.appendChild(browseBtn)
     page.appendChild(empty)
     return page
   }
 
-  if (view === 'grid') {
-    const grid = el('div', { class: 'site-grid' })
-    favSites.forEach(s => grid.appendChild(SiteCard(s, true)))
-    page.appendChild(grid)
-  } else if (view === 'list') {
-    const list = el('div', { class: 'site-list' })
-    favSites.forEach(s => list.appendChild(SiteListItem(s, true)))
-    page.appendChild(list)
-  } else {
-    const compact = el('div', { style: 'background:var(--surface-raised);border-radius:var(--radius);overflow:hidden;' })
-    favSites.forEach(s => {
-      const row = el('div', { class: 'site-compact' })
-      const starEl = el('span', { style: 'color:var(--accent);display:inline-flex;' })
-      starEl.innerHTML = icon('starFilled')
-      row.appendChild(starEl)
-      row.appendChild(el('span', { class: 'site-compact-name' }, s.name))
-      compact.appendChild(row)
-    })
-    page.appendChild(compact)
+  page.appendChild(el('p', { class: 'wiki-lead' },
+    `${pluralize(favSites.length, 'site')} saved on this device.`))
+
+  const rendered = new Set<string>()
+
+  categories.forEach(category => {
+    const categorySites = favSites.filter(site => site.category === category.id)
+    if (categorySites.length === 0) return
+    rendered.add(category.id)
+
+    const section = el('section', { class: 'wiki-section' })
+    const heading = el('h2', { class: 'wiki-section-title', id: `favorites-${category.id}` })
+    heading.appendChild(el('a', { href: basePath(`/browse?category=${category.id}`) }, category.name))
+    heading.appendChild(el('span', { class: 'wiki-section-count' }, pluralize(categorySites.length, 'site')))
+    section.appendChild(heading)
+
+    const list = el('ul', { class: 'wiki-link-list' })
+    categorySites.forEach(site => list.appendChild(CollectionSiteRow(site, true)))
+    section.appendChild(list)
+    page.appendChild(section)
+  })
+
+  const otherSites = favSites.filter(site => !rendered.has(site.category))
+  if (otherSites.length > 0) {
+    const section = el('section', { class: 'wiki-section' })
+    const heading = el('h2', { class: 'wiki-section-title', id: 'favorites-other' })
+    heading.appendChild(document.createTextNode('Other'))
+    heading.appendChild(el('span', { class: 'wiki-section-count' }, pluralize(otherSites.length, 'site')))
+    section.appendChild(heading)
+
+    const list = el('ul', { class: 'wiki-link-list' })
+    otherSites.forEach(site => list.appendChild(CollectionSiteRow(site, true)))
+    section.appendChild(list)
+    page.appendChild(section)
   }
 
   return page

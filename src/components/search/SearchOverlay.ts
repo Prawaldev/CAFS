@@ -57,7 +57,7 @@ export function SearchOverlay(
       })
       resultsContainer.appendChild(recentDiv)
     } else {
-      resultsContainer.innerHTML = '<div class="search-empty">Type to search across 134+ sites</div>'
+      resultsContainer.innerHTML = `<div class="search-empty">Type to search across ${sites.length} sites</div>`
     }
   }
 
@@ -108,7 +108,7 @@ export function SearchOverlay(
 
         row.addEventListener('click', () => {
           onClose()
-          navigate(`/site?id=${item.id}`)
+          window.open(item.url, '_blank', 'noopener,noreferrer')
         })
 
         resultsContainer.appendChild(row)

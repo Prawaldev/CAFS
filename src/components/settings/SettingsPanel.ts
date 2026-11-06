@@ -4,8 +4,6 @@ import type { AppState } from '../../types'
 
 export interface SettingsCallbacks {
   onChangeAccent: (color: string) => void
-  onChangeBlur: (enabled: boolean) => void
-  onChangeParallax: (enabled: boolean) => void
   onClose: () => void
 }
 
@@ -28,11 +26,11 @@ export function SettingsPanel(
   accentGroup.appendChild(el('div', { class: 'settings-group-title' }, 'Accent Color'))
   const picker = el('div', { class: 'accent-picker' })
   const colors: Record<string, string> = {
-    blossom: '#f7b3ef',
-    lilac: '#c9a7f5',
-    sky: '#a8c7fa',
-    sage: '#b8d1a8',
-    gold: '#d2d389',
+    blossom: '#7bc5e4',
+    lilac: '#c4b5fd',
+    sky: '#7aa2f7',
+    sage: '#8fd48f',
+    gold: '#e8d06f',
     rose: '#f4a7b9',
   }
   Object.entries(colors).forEach(([name, hex]) => {
@@ -46,25 +44,6 @@ export function SettingsPanel(
   })
   accentGroup.appendChild(picker)
   panel.appendChild(accentGroup)
-
-  const appearanceGroup = el('div', { class: 'settings-group' })
-  appearanceGroup.appendChild(el('div', { class: 'settings-group-title' }, 'Appearance'))
-
-  const blurRow = el('div', { class: 'settings-row' })
-  blurRow.appendChild(el('span', { class: 'settings-row-label' }, 'Blur Effects'))
-  const blurToggle = el('div', { class: `settings-toggle${state.blurEnabled ? ' active' : ''}` })
-  blurToggle.addEventListener('click', () => callbacks.onChangeBlur(!state.blurEnabled))
-  blurRow.appendChild(blurToggle)
-  appearanceGroup.appendChild(blurRow)
-
-  const parallaxRow = el('div', { class: 'settings-row' })
-  parallaxRow.appendChild(el('span', { class: 'settings-row-label' }, 'Parallax Background'))
-  const parallaxToggle = el('div', { class: `settings-toggle${state.parallaxEnabled ? ' active' : ''}` })
-  parallaxToggle.addEventListener('click', () => callbacks.onChangeParallax(!state.parallaxEnabled))
-  parallaxRow.appendChild(parallaxToggle)
-  appearanceGroup.appendChild(parallaxRow)
-
-  panel.appendChild(appearanceGroup)
 
   overlay.appendChild(panel)
   overlay.addEventListener('click', (e) => {

@@ -1,73 +1,157 @@
 import { el } from '../utils/dom'
 import { icon, icons } from '../utils/icons'
-import { SiteCard } from '../components/site/SiteCard'
-import { pluralize } from '../utils/format'
+import { pluralize, shortDesc } from '../utils/format'
 import { navigate, basePath } from '../utils/router'
 import type { Site, Category } from '../types'
 
-export function HomePage(sites: Site[], categories: Category[], favIds: string[], recentIds?: Set<string>): HTMLElement {
-  const page = el('div', {})
+const featureColors: Record<string, string> = {
+  anime: '#d05a6e',
+  manga: '#3ccd93',
+  novels: '#a8d8b9',
+  tokusatsu: '#fb9966',
+  comics: '#bec23f',
+  software: '#7aa2f7',
+  music: '#7c82fe',
+  tools: '#49d3e9',
+  misc: '#ddd23b',
+  art: '#f17c67',
+  games: '#dac9a6',
+  nsfw: '#c4b5fd',
+}
 
-  const hero = el('div', { class: 'hero-minimal animate-fade-in', style: 'display:flex;align-items:center;justify-content:center;padding:var(--space-8);' })
-  const img = el('img', { src: basePath('/hello.jpg'), alt: 'satre', style: 'max-width:100%;height:auto;max-height:320px;border-radius:var(--radius);' }) as HTMLImageElement
-  hero.appendChild(img)
+const featureIcons: Record<string, keyof typeof icons> = {
+  anime: 'star',
+  manga: 'bookmark',
+  novels: 'bookmark',
+  tokusatsu: 'star',
+  comics: 'bookmark',
+  software: 'grid3x3',
+  music: 'heart',
+  tools: 'settings',
+  misc: 'folder',
+  art: 'heart',
+  games: 'grid3x3',
+  nsfw: 'star',
+}
+
+export function HomePage(sites: Site[], categories: Category[], _favIds: string[], _recentIds?: Set<string>): HTMLElement {
+  const page = el('div', { class: 'home-page vp-home' })
+
+  const hero = el('section', { class: 'vp-hero' })
+  const heroInner = el('div', { class: 'vp-hero-inner' })
+  const main = el('div', { class: 'vp-hero-main' })
+
+  const name = el('h1', { class: 'vp-hero-name' })
+  name.innerHTML = '<span class="vp-hero-name-clip">CAFS</span>'
+  main.appendChild(name)
+  main.appendChild(el('p', { class: 'vp-hero-tagline' },
+    'The curated collection of anime, manga, reading, gaming and tool resources on the internet.'))
+
+  const actions = el('div', { class: 'vp-hero-actions' })
+
+  const browseBtn = el('a', { class: 'vp-button brand', href: basePath('/browse') }, 'Browse the wiki')
+  browseBtn.addEventListener('click', (e) => { e.preventDefault(); navigate('/browse') })
+  actions.appendChild(browseBtn)
+
+  const randomBtn = el('button', { class: 'vp-button alt', type: 'button' }, 'Random site')
+  randomBtn.addEventListener('click', () => {
+    const site = sites[Math.floor(Math.random() * sites.length)]
+    if (site) window.open(site.url, '_blank', 'noopener,noreferrer')
+  })
+  actions.appendChild(randomBtn)
+
+  const dashBtn = el('a', { class: 'vp-button alt', href: basePath('/dashboard') }, 'Statistics')
+  dashBtn.addEventListener('click', (e) => { e.preventDefault(); navigate('/dashboard') })
+  actions.appendChild(dashBtn)
+
+  main.appendChild(actions)
+
+  const meta = el('p', { class: 'vp-hero-meta' })
+  meta.textContent = `${pluralize(sites.length, 'site')} across ${pluralize(categories.length, 'page')} · hand-picked and updated regularly`
+  main.appendChild(meta)
+  heroInner.appendChild(main)
+
+  hero.appendChild(heroInner)
   page.appendChild(hero)
 
-  const catSection = el('div', { class: 'home-categories animate-fade-in-up' })
-  const catTitle = el('h2', { class: 'section-title', style: 'margin-bottom:var(--space-3);' })
-  catTitle.innerHTML = `<span class="prompt">01.</span> Browse by Category`
-  catSection.appendChild(catTitle)
+  const features = el('section', { class: 'vp-features' })
+  features.appendChild(el('p', { class: 'vp-features-intro' }, 'Or browse these pages ✨'))
 
-  const catGrid = el('div', { class: 'category-grid' })
-  const catIcons: Record<string, keyof typeof icons> = {
-    anime: 'star',
-    manga: 'bookmark',
-    novels: 'bookmark',
-    tokusatsu: 'star',
-    comics: 'bookmark',
-    software: 'grid3x3',
-    music: 'heart',
-    tools: 'search',
-    misc: 'search',
-    art: 'heart',
-    games: 'grid3x3',
-    nsfw: 'star',
-  }
-  categories.forEach(cat => {
-    const count = sites.filter(s => s.category === cat.id).length
-    const iconName = catIcons[cat.id] || 'chevronRight'
-    const card = el('div', { class: 'category-card' })
-    card.innerHTML = `
-      <div class="category-card-icon">${icon(iconName, 22)}</div>
-      <div class="category-card-name">${cat.name}</div>
-      <div class="category-card-count">${pluralize(count, 'site')}</div>
-      <div class="category-card-desc">${cat.description}</div>
-    `
-    card.addEventListener('click', () => navigate(`/browse?category=${cat.id}`))
-    catGrid.appendChild(card)
+  const grid = el('div', { class: 'vp-features-grid' })
+  categories.forEach(category => {
+    const count = sites.filter(site => site.category === category.id).length
+    if (count === 0) return
+
+    const card = el('a', {
+      class: 'vp-feature',
+      href: basePath(`/browse?category=${category.id}`),
+      'aria-label': `Open the ${category.name} page`,
+    })
+
+    const box = el('div', { class: 'vp-feature-box' })
+    const glyph = el('div', {
+      class: 'vp-feature-icon',
+      style: `color:${featureColors[category.id] || 'var(--accent)'}`,
+      'aria-hidden': 'true',
+    })
+    glyph.innerHTML = icon(featureIcons[category.id] || 'folder', 24)
+    box.appendChild(glyph)
+    box.appendChild(el('h2', { class: 'vp-feature-title' }, category.name))
+    box.appendChild(el('p', { class: 'vp-feature-details' }, category.description))
+    box.appendChild(el('span', { class: 'vp-feature-link' }, `${pluralize(count, 'site')} →`))
+    card.appendChild(box)
+
+    card.addEventListener('click', (event) => {
+      event.preventDefault()
+      navigate(`/browse?category=${category.id}`)
+    })
+    grid.appendChild(card)
   })
-  catSection.appendChild(catGrid)
-  page.appendChild(catSection)
+  features.appendChild(grid)
+  page.appendChild(features)
 
-  const sorted = [...sites].sort((a, b) => {
-    const aChanged = recentIds?.has(a.id) ?? false
-    const bChanged = recentIds?.has(b.id) ?? false
-    if (aChanged !== bChanged) return aChanged ? -1 : 1
-    return b.updatedAt.localeCompare(a.updatedAt)
-  })
-  const recent = sorted.slice(0, 6)
-  if (recent.length > 0) {
-    const recentSection = el('div', { class: 'home-recent animate-fade-in-up' })
-    const recentTitle = el('h2', { class: 'section-title', style: 'margin-bottom:var(--space-3);' })
-    recentTitle.innerHTML = `<span class="prompt">02.</span> Recent Additions &amp; Updates`
-    recentSection.appendChild(recentTitle)
-    const grid = el('div', { class: 'site-grid' })
-    recent.forEach(s => grid.appendChild(SiteCard(s, favIds.includes(s.id))))
-    recentSection.appendChild(grid)
-    page.appendChild(recentSection)
+  if (sites.length > 0) {
+    const latest = el('section', { class: 'vp-features vp-latest' })
+    latest.appendChild(el('p', { class: 'vp-features-intro' }, 'Recently added & updated'))
+
+    const list = el('ul', { class: 'wiki-link-list wiki-link-list-home' })
+    const sorted = [...sites].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 12)
+    sorted.forEach(site => {
+      const item = el('li', { class: 'wiki-link-item' })
+
+      const nameLink = el('a', {
+        class: 'wiki-link-name',
+        href: site.url,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        title: `Open ${site.name} in a new tab`,
+        'aria-label': `Open ${site.name} in a new tab`,
+      }, site.name)
+      item.appendChild(nameLink)
+
+      item.appendChild(el('span', { class: 'wiki-link-desc' }, ` – ${shortDesc(site.description, 150)}`))
+
+      const ext = el('a', {
+        class: 'wiki-link-ext',
+        href: site.url,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        title: `Open ${site.name} in a new tab`,
+        'aria-label': `Open ${site.name} in a new tab`,
+      })
+      ext.innerHTML = icon('externalLink')
+      item.appendChild(ext)
+      list.appendChild(item)
+    })
+    latest.appendChild(list)
+
+    const all = el('p', { class: 'vp-latest-more' })
+    const allLink = el('a', { href: basePath('/browse') }, 'Browse the full wiki index →')
+    allLink.addEventListener('click', (event) => { event.preventDefault(); navigate('/browse') })
+    all.appendChild(allLink)
+    latest.appendChild(all)
+    page.appendChild(latest)
   }
-
-
 
   return page
 }

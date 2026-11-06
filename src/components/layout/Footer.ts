@@ -3,7 +3,7 @@ import { el } from '../../utils/dom'
 export function Footer(siteCount: number): HTMLElement {
   const footer = el('footer', { class: 'footer' })
   const left = el('span', { class: 'footer-brand' })
-  left.innerHTML = `<span class="prompt">&gt;_</span> Piralib <span class="dash"></span> ${siteCount} curated sites`
+  left.innerHTML = ''
   const links = el('div', { class: 'footer-links' })
   const linkData = [
     { label: 'GitHub ↗', href: 'https://github.com/6bpr/Pirated-Lib' },

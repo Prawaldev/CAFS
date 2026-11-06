@@ -1,70 +1,29 @@
 import { el } from '../utils/dom'
 import { icon } from '../utils/icons'
-import { SiteCard } from '../components/site/SiteCard'
-import { SiteListItem } from '../components/site/SiteListItem'
-import { SiteCompact } from '../components/site/SiteCompact'
-import { FilterBar } from '../components/layout/FilterBar'
 import { Breadcrumbs } from '../components/ui/Breadcrumbs'
+import { CollectionIndex } from '../components/collection/CollectionIndex'
+import { CollectionSiteRow, CollectionTree } from '../components/collection/CollectionTree'
 import { pluralize } from '../utils/format'
-import type { Site, Category, FilterState, SortOption } from '../types'
+import { basePath, navigate } from '../utils/router'
+import type { Site, Category, FilterState } from '../types'
 
-export function BrowsePage(
-  sites: Site[],
-  categories: Category[],
-  filters: FilterState,
-  view: 'grid' | 'list' | 'compact',
-  favIds: string[],
-  onFilterChange: (filters: FilterState) => void,
-  onViewChange: (view: 'grid' | 'list' | 'compact') => void,
-): HTMLElement {
-  const page = el('div', {})
-
-  page.appendChild(Breadcrumbs([
-    { label: 'Home', href: '/' },
-    { label: 'Browse' },
-  ]))
-
-  const header = el('div', { class: 'browse-header' })
-  header.appendChild(el('h1', { style: 'font-size:var(--text-2xl);font-weight:700;margin-bottom:var(--space-1);' }, 'Browse Sites'))
-  page.appendChild(header)
-
-  const searchInput = el('input', {
-    class: 'browse-search-input',
-    type: 'text',
-    name: 'browse-search',
-    placeholder: 'Filter sites by name, description, tags…',
-    value: filters.query,
-  }) as HTMLInputElement
-  let searchTimer: number | undefined
-  searchInput.addEventListener('input', () => {
-    clearTimeout(searchTimer)
-    searchTimer = window.setTimeout(() => {
-      onFilterChange({ ...filters, query: searchInput.value })
-    }, 400)
-  })
-  page.appendChild(searchInput)
-
-  page.appendChild(FilterBar(filters, onFilterChange, onViewChange, view, categories))
-
+function filterSites(sites: Site[], filters: FilterState): Site[] {
   let filtered = [...sites]
 
   if (filters.query) {
-    const q = filters.query.toLowerCase()
-    filtered = filtered.filter(s =>
-      s.name.toLowerCase().includes(q) ||
-      s.description.toLowerCase().includes(q) ||
-      s.tags.some(t => t.toLowerCase().includes(q)) ||
-      s.category.includes(q) ||
-      s.subcategory.includes(q)
+    const query = filters.query.toLowerCase()
+    filtered = filtered.filter(site =>
+      site.name.toLowerCase().includes(query) ||
+      site.description.toLowerCase().includes(query) ||
+      site.tags.some(tag => tag.toLowerCase().includes(query)) ||
+      site.category.includes(query) ||
+      site.subcategory.includes(query),
     )
   }
 
-  if (filters.category) {
-    filtered = filtered.filter(s => s.category === filters.category)
-  }
-  if (filters.subcategory) {
-    filtered = filtered.filter(s => s.subcategory === filters.subcategory)
-  }
+  if (filters.category) filtered = filtered.filter(site => site.category === filters.category)
+  if (filters.subcategory) filtered = filtered.filter(site => site.subcategory === filters.subcategory)
+
   switch (filters.sort) {
     case 'name-asc': filtered.sort((a, b) => a.name.localeCompare(b.name)); break
     case 'name-desc': filtered.sort((a, b) => b.name.localeCompare(a.name)); break
@@ -72,31 +31,171 @@ export function BrowsePage(
     case 'updated': filtered.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)); break
   }
 
-  const countEl = el('div', { class: 'browse-count' }, `Showing ${pluralize(filtered.length, 'site')}`)
-  page.appendChild(countEl)
+  return filtered
+}
 
-  if (filtered.length === 0) {
-    const empty = el('div', { class: 'empty-state' })
-    empty.innerHTML = `<div class="icon">${icon('search', 32)}</div>`
-    empty.appendChild(el('div', { class: 'empty-state-title' }, 'No sites match your filters'))
-    empty.appendChild(el('div', { class: 'empty-state-desc' }, 'Try adjusting your search or clearing filters.'))
-    page.appendChild(empty)
+function emptyState(
+  title: string,
+  description: string,
+  actionLabel: string,
+  action: () => void,
+): HTMLElement {
+  const empty = el('div', { class: 'empty-state' })
+  const glyph = el('div', { class: 'icon' })
+  glyph.innerHTML = icon('search', 28)
+  empty.appendChild(glyph)
+  empty.appendChild(el('div', { class: 'empty-state-title' }, title))
+  empty.appendChild(el('div', { class: 'empty-state-desc' }, description))
+  const button = el('button', { class: 'btn btn-secondary', type: 'button' }, actionLabel)
+  button.addEventListener('click', action)
+  empty.appendChild(button)
+  return empty
+}
+
+function wikiHeader(title: string, description: string, meta?: string): HTMLElement {
+  const header = el('header', { class: 'wiki-header' })
+  header.appendChild(el('h1', {}, title))
+  header.appendChild(el('p', { class: 'wiki-lead' }, description))
+  if (meta) header.appendChild(el('p', { class: 'wiki-meta' }, meta))
+  return header
+}
+
+function searchResults(categories: Category[], sites: Site[], favIds: string[]): HTMLElement {
+  const results = el('div', { class: 'wiki-sections' })
+
+  categories.forEach(category => {
+    const categorySites = sites.filter(site => site.category === category.id)
+    if (categorySites.length === 0) return
+
+    const section = el('section', { class: 'wiki-section' })
+    const heading = el('h2', { class: 'wiki-section-title', id: `search-${category.id}` })
+    heading.appendChild(el('a', { href: basePath(`/browse?category=${category.id}`) }, category.name))
+    heading.appendChild(el('span', { class: 'wiki-section-count' }, pluralize(categorySites.length, 'site')))
+    section.appendChild(heading)
+
+    const list = el('ul', { class: 'wiki-link-list' })
+    categorySites.forEach(site => {
+      list.appendChild(CollectionSiteRow(site, favIds.includes(site.id)))
+    })
+    section.appendChild(list)
+    results.appendChild(section)
+  })
+
+  return results
+}
+
+export function BrowsePage(
+  sites: Site[],
+  categories: Category[],
+  filters: FilterState,
+  favIds: string[],
+  onFilterChange?: (filters: FilterState) => void,
+): HTMLElement {
+  const page = el('div', { class: 'collection-page wiki-page' })
+  const category = filters.category ? categories.find(item => item.id === filters.category) : undefined
+  const subcategory = category && filters.subcategory
+    ? category.subcategories.find(item => item.id === filters.subcategory)
+    : undefined
+
+  const crumbs: Array<{ label: string; href?: string }> = [{ label: 'Home', href: '/' }]
+  if (category) {
+    crumbs.push({ label: 'Wiki', href: '/browse' })
+    crumbs.push({
+      label: category.name,
+      href: subcategory ? `/browse?category=${category.id}` : undefined,
+    })
+    if (subcategory) crumbs.push({ label: subcategory.name })
+  } else {
+    crumbs.push({ label: 'Wiki' })
+  }
+  page.appendChild(Breadcrumbs(crumbs))
+
+  if (filters.category && !category) {
+    page.appendChild(el('h1', {}, 'Wiki not found'))
+    page.appendChild(emptyState(
+      'That page does not exist',
+      'The collection you are looking for is not part of this wiki.',
+      'Back to the wiki',
+      () => navigate('/browse'),
+    ))
     return page
   }
 
-  if (view === 'grid') {
-    const grid = el('div', { class: 'site-grid' })
-    filtered.forEach(s => grid.appendChild(SiteCard(s, favIds.includes(s.id))))
-    page.appendChild(grid)
-  } else if (view === 'list') {
-    const list = el('div', { class: 'site-list' })
-    filtered.forEach(s => list.appendChild(SiteListItem(s, favIds.includes(s.id))))
-    page.appendChild(list)
-  } else {
-    const compact = el('div', { style: 'background:var(--surface-raised);border-radius:var(--radius);overflow:hidden;' })
-    filtered.forEach(s => compact.appendChild(SiteCompact(s)))
-    page.appendChild(compact)
+  const visibleSites = filterSites(sites, filters)
+
+  if (filters.query) {
+    page.appendChild(wikiHeader(
+      'Search results',
+      `Sites matching “${filters.query}” across the wiki.`,
+      `${pluralize(visibleSites.length, 'site')} found`,
+    ))
+
+    if (visibleSites.length === 0) {
+      page.appendChild(emptyState(
+        'No sites match your search',
+        'Try a shorter term, a different spelling, or clear the search.',
+        'Clear search',
+        () => onFilterChange?.({
+          ...filters,
+          query: '',
+          category: null,
+          subcategory: null,
+          tags: [],
+        }),
+      ))
+    } else {
+      page.appendChild(searchResults(categories, visibleSites, favIds))
+    }
+    return page
   }
+
+  if (!category) {
+    page.appendChild(wikiHeader(
+      'Wiki',
+      'A hand-picked directory of anime, manga, reading, gaming and tool resources. Pick a page to see every entry in that section.',
+      `${pluralize(sites.length, 'site')} across ${pluralize(categories.length, 'page')}`,
+    ))
+    page.appendChild(CollectionIndex(categories, sites, false, filters.sort))
+    return page
+  }
+
+  const categorySites = sites.filter(site => site.category === category.id)
+  const populatedSections = category.subcategories.filter(sub =>
+    categorySites.some(site => site.subcategory === sub.id),
+  ).length
+  const pageTitle = subcategory ? subcategory.name : category.name
+  const countText = subcategory
+    ? `${pluralize(visibleSites.length, 'site')} in ${subcategory.name}`
+    : `${pluralize(visibleSites.length, 'site')} across ${pluralize(populatedSections, 'section')}`
+
+  page.appendChild(wikiHeader(pageTitle, category.description, countText))
+
+  if (visibleSites.length === 0) {
+    page.appendChild(emptyState(
+      'Nothing here yet',
+      'This page does not have any entries right now.',
+      'Back to the wiki',
+      () => navigate('/browse'),
+    ))
+    return page
+  }
+
+  if (subcategory) {
+    const list = el('ul', { class: 'wiki-link-list' })
+    visibleSites.forEach(site => {
+      list.appendChild(CollectionSiteRow(site, favIds.includes(site.id)))
+    })
+    page.appendChild(list)
+    return page
+  }
+
+  page.appendChild(CollectionTree(
+    visibleSites,
+    category,
+    favIds,
+    false,
+    sub => navigate(`/browse?category=${category.id}&subcategory=${sub.id}`),
+  ))
 
   return page
 }

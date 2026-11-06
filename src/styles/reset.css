@@ -9,6 +9,7 @@ html {
   scroll-padding-top: 2rem;
   -webkit-text-size-adjust: 100%;
   color-scheme: dark light;
+  font-size: 18px;
 }
 
 body {

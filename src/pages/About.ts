@@ -1,55 +1,58 @@
 import { el } from '../utils/dom'
 import { Breadcrumbs } from '../components/ui/Breadcrumbs'
+import { pluralize } from '../utils/format'
 import type { Site, Category } from '../types'
 
+function slugify(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+}
+
 export function AboutPage(sites: Site[], categories: Category[]): HTMLElement {
-  const page = el('div', {})
+  const page = el('div', { class: 'wiki-page about-page' })
 
   page.appendChild(Breadcrumbs([
     { label: 'Home', href: '/' },
     { label: 'About' },
   ]))
 
-  const content = el('div', { class: 'about-content' })
-
-  content.appendChild(el('h1', { style: 'font-size:var(--text-2xl);font-weight:700;margin-bottom:var(--space-4);' }, 'About Piralib'))
+  page.appendChild(el('h1', {}, 'About cafs'))
+  page.appendChild(el('p', { class: 'wiki-lead' },
+    'cafs is a curated index of the best anime, manga, reading, gaming and tool resources on the internet. Every entry is hand-picked and kept up to date.'))
 
   const sections = [
     {
       title: 'What is this?',
-      body: `Piralib is a curated index of the best anime resources on the internet. Every site is hand-picked, reviewed, and maintained by enthusiasts. Think of it as an archive and discovery hub — not a search engine, but a vetted collection.`,
+      body: 'cafs is an archive and discovery hub, not a search engine. Think of it as a vetted collection: sites are reviewed before they are listed, and entries are trimmed when they stop being useful.',
     },
     {
-      title: 'How are sites curated?',
-      body: `Every site is manually reviewed before listing. Criteria include: reliable uptime, active maintenance, genuine utility, and community reputation.`,
+      title: 'How sites are curated',
+      body: 'Every site is manually reviewed. Criteria include reliable uptime, active maintenance, genuine utility, and community reputation. Featured entries are marked with a star.',
     },
     {
       title: 'Technical details',
       body: [
-        `Built with Vite + TypeScript. All data is static JSON. No backend, no database, no authentication, no user accounts.`,
-        `Search powered by Fuse.js (client-side fuzzy search).`,
-        `User preferences (favorites, history, notes) stored in localStorage — never sent to any server.`,
-        `Hosted on GitHub Pages.`,
+        'Built with Vite + TypeScript. All data is static JSON.',
+        'No backend, no database, no authentication, no user accounts.',
+        'Search is powered by Fuse.js and runs entirely in your browser.',
+        'Favorites, history, and notes are stored in localStorage and never sent to a server.',
       ].join('\n'),
     },
     {
       title: 'Current status',
-      body: `${sites.length} curated sites across ${categories.length} categories. Maintained by a single developer.`,
+      body: `${pluralize(sites.length, 'site')} across ${pluralize(categories.length, 'page')}. Maintained by a small group of enthusiasts.`,
     },
     {
       title: 'Contributing',
-      body: `To suggest a site, report a broken link, or contribute: open an issue or pull request on GitHub.`,
+      body: 'To suggest a site, report a broken link, or contribute, open an issue or pull request on GitHub.',
     },
   ]
 
-  sections.forEach(s => {
-    const section = el('div', { style: 'margin-bottom:var(--space-6);' })
-    section.appendChild(el('h2', { style: 'font-size:var(--text-lg);font-weight:600;margin-bottom:var(--space-2);' }, s.title))
-    const p = el('p', { style: 'color:var(--text-secondary);line-height:1.6;white-space:pre-line;' }, s.body)
-    section.appendChild(p)
-    content.appendChild(section)
+  sections.forEach(section => {
+    const block = el('section', { class: 'about-section' })
+    block.appendChild(el('h2', { class: 'about-section-title', id: slugify(section.title) }, section.title))
+    block.appendChild(el('p', { class: 'about-body', style: 'white-space:pre-line;' }, section.body))
+    page.appendChild(block)
   })
 
-  page.appendChild(content)
   return page
 }

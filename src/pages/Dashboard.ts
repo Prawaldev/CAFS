@@ -1,33 +1,35 @@
 import { el } from '../utils/dom'
-import { icon } from '../utils/icons'
 import { StatCard } from '../components/stats/StatCard'
 import { TagCloud } from '../components/stats/TagCloud'
 import { Breadcrumbs } from '../components/ui/Breadcrumbs'
 import { pluralize, relativeTime } from '../utils/format'
+import { basePath, navigate } from '../utils/router'
 import type { Site, Category } from '../types'
 
 export function DashboardPage(sites: Site[], categories: Category[], recentIds?: Set<string>): HTMLElement {
-  const page = el('div', {})
+  const page = el('div', { class: 'wiki-page' })
 
   page.appendChild(Breadcrumbs([
     { label: 'Home', href: '/' },
-    { label: 'Dashboard' },
+    { label: 'Statistics' },
   ]))
 
-  const pageTitle = el('h1', { style: 'font-size:var(--text-2xl);font-weight:700;margin-bottom:var(--space-6);' })
-  pageTitle.innerHTML = `${icon('barChart3', 24)} Dashboard`
-  page.appendChild(pageTitle)
+  page.appendChild(el('h1', {}, 'Statistics'))
+  page.appendChild(el('p', { class: 'wiki-lead' },
+    'A quick look at the shape of the archive: how many entries live here, where they are, and what changed recently.'))
 
   const uniqueTags = new Set(sites.flatMap(s => s.tags)).size
 
   const stats = el('div', { class: 'stats-grid' })
-  stats.appendChild(StatCard(sites.length, 'Total Sites'))
-  stats.appendChild(StatCard(categories.length, 'Categories'))
-  stats.appendChild(StatCard(uniqueTags, 'Unique Tags'))
+  stats.appendChild(StatCard(sites.length, 'Total sites'))
+  stats.appendChild(StatCard(categories.length, 'Pages'))
+  stats.appendChild(StatCard(uniqueTags, 'Unique tags'))
   page.appendChild(stats)
 
-  const catSection = el('div', { class: 'dashboard-section' })
-  catSection.appendChild(el('h2', { class: 'dashboard-section-title' }, 'Sites per Category'))
+  const catSection = el('section', { class: 'dashboard-section' })
+  const catHeading = el('h2', { class: 'dashboard-section-title', id: 'sites-per-page' }, 'Sites per page')
+  catSection.appendChild(catHeading)
+
   const catChart = el('div', { class: 'bar-chart' })
   const maxCat = Math.max(...categories.map(c => sites.filter(s => s.category === c.id).length), 1)
   categories.forEach(cat => {
@@ -44,28 +46,41 @@ export function DashboardPage(sites: Site[], categories: Category[], recentIds?:
   catSection.appendChild(catChart)
   page.appendChild(catSection)
 
-  const tagSection = el('div', { class: 'dashboard-section' })
-  tagSection.appendChild(el('h2', { class: 'dashboard-section-title' }, 'Tag Cloud'))
+  const tagSection = el('section', { class: 'dashboard-section' })
+  tagSection.appendChild(el('h2', { class: 'dashboard-section-title', id: 'tag-cloud' }, 'Tag cloud'))
   tagSection.appendChild(TagCloud(sites))
   page.appendChild(tagSection)
 
-  const recentSection = el('div', { class: 'dashboard-section' })
-  recentSection.appendChild(el('h2', { class: 'dashboard-section-title' }, 'Recently Updated'))
+  const recentSection = el('section', { class: 'dashboard-section' })
+  recentSection.appendChild(el('h2', { class: 'dashboard-section-title', id: 'recently-updated' }, 'Recently updated'))
+
   const recent = [...sites].sort((a, b) => {
     const aChanged = recentIds?.has(a.id) ?? false
     const bChanged = recentIds?.has(b.id) ?? false
     if (aChanged !== bChanged) return aChanged ? -1 : 1
     return b.updatedAt.localeCompare(a.updatedAt)
-  }).slice(0, 5)
-  const recentList = el('div', { style: 'display:flex;flex-direction:column;gap:var(--space-2);' })
-  recent.forEach(s => {
-    recentList.appendChild(el('div', { style: 'font-size:var(--text-sm);display:flex;justify-content:space-between;gap:var(--space-2);flex-wrap:wrap;' },
-      el('span', { style: 'font-weight:500;word-break:break-word;overflow-wrap:break-word;' }, s.name),
-      el('span', { style: 'color:var(--text-muted);flex-shrink:0;' }, relativeTime(s.updatedAt)),
-    ))
+  }).slice(0, 8)
+
+  const recentList = el('ul', { class: 'wiki-link-list' })
+  recent.forEach(site => {
+    const item = el('li', { class: 'wiki-link-item' })
+    const link = el('a', {
+      class: 'wiki-link-name',
+      href: site.url,
+      target: '_blank',
+      rel: 'noopener noreferrer',
+      title: `Open ${site.name} in a new tab`,
+      'aria-label': `Open ${site.name} in a new tab`,
+    }, site.name)
+    item.appendChild(link)
+    item.appendChild(el('span', { class: 'wiki-link-desc' }, ` – updated ${relativeTime(site.updatedAt)}`))
+    recentList.appendChild(item)
   })
   recentSection.appendChild(recentList)
   page.appendChild(recentSection)
+
+  page.appendChild(el('p', { class: 'wiki-meta' },
+    `${pluralize(sites.length, 'entry', 'entries')} · ${pluralize(uniqueTags, 'tag')}`))
 
   return page
 }
