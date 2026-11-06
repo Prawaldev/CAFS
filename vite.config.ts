@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: '/CAFS/',
+  base: 'CAFS',
   build: {
     outDir: 'dist',
     sourcemap: true,

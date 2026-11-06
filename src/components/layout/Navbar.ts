@@ -31,7 +31,7 @@ export function Navbar(currentPage: PageName, theme: 'dark' | 'light', callbacks
     href: basePath('/'),
     'aria-label': 'cafs home',
   })
-  logo.innerHTML = `<img src="${basePath('/favicon_io/favicon.svg')}" class="navbar-favicon" alt="" width="24" height="24"><span class="navbar-logo-text">cafs</span>`
+  logo.innerHTML = `<img src="${basePath('/favicon/favicon.svg')}" class="navbar-favicon" alt="" width="24" height="24"><span class="navbar-logo-text">cafs</span>`
   logo.addEventListener('click', (e) => {
     e.preventDefault()
     navigate('/')
