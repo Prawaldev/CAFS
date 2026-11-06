@@ -22,4 +22,4 @@ export function Footer(siteCount: number): HTMLElement {
   footer.appendChild(left)
   footer.appendChild(links)
   return footer
-}
+}  
