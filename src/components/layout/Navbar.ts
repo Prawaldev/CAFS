@@ -98,7 +98,7 @@ export function Navbar(currentPage: PageName, theme: 'dark' | 'light', callbacks
 
   const githubBtn = el('a', {
     class: 'navbar-btn-icon navbar-github',
-    href: 'https://github.com/6bpr/Pirated-Lib',
+    href: 'https://github.com/Prawaldev/CAFS',
     target: '_blank',
     rel: 'noopener',
     title: 'GitHub',

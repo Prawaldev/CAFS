@@ -1,9 +1,7 @@
-import { el, qs } from '../../utils/dom'
+import { el } from '../../utils/dom'
 import { icon } from '../../utils/icons'
 import { Tag } from '../ui/Tag'
 import { search, highlightMatches, type MatchData } from '../../utils/search'
-import { navigate } from '../../utils/router'
-import { cleanUrl } from '../../utils/format'
 import type { Site } from '../../types'
 
 export function SearchOverlay(

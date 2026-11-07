@@ -3,10 +3,10 @@ import { el } from '../../utils/dom'
 export function Footer(): HTMLElement {
   const footer = el('footer', { class: 'footer' })
   const left = el('span', { class: 'footer-brand' })
-  left.innerHTML = ''
+  left.innerHTML = 'CAFS'
   const links = el('div', { class: 'footer-links' })
   const linkData = [
-    { label: 'GitHub ↗', href: 'https://github.com/6bpr/Pirated-Lib' },
+    { label: 'GitHub ↗', href: 'https://github.com/Prawaldev/CAFS' },
     { label: 'back to top ↑', href: '#top' },
   ]
   linkData.forEach(l => {

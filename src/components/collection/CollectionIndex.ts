@@ -1,6 +1,7 @@
 import { el } from '../../utils/dom'
 import { basePath } from '../../utils/router'
 import { pluralize } from '../../utils/format'
+import { renderInlineMarkdown } from '../../utils/markdown'
 import type { Category, Site, SortOption } from '../../types'
 
 function latestDate(sites: Site[], key: 'addedAt' | 'updatedAt'): string {
@@ -43,7 +44,9 @@ export function CollectionIndex(
     heading.appendChild(el('span', { class: 'wiki-section-count' }, pluralize(categorySites.length, 'site')))
     section.appendChild(heading)
 
-    section.appendChild(el('p', { class: 'wiki-section-desc' }, category.description))
+    const description = el('p', { class: 'wiki-section-desc' })
+    description.innerHTML = renderInlineMarkdown(category.description)
+    section.appendChild(description)
 
     if (populatedSections.length > 0) {
       const links = el('p', { class: 'wiki-subcat-links' })

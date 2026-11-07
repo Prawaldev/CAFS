@@ -4,6 +4,7 @@ import { Breadcrumbs } from '../components/ui/Breadcrumbs'
 import { CollectionIndex } from '../components/collection/CollectionIndex'
 import { CollectionSiteRow, CollectionTree } from '../components/collection/CollectionTree'
 import { pluralize } from '../utils/format'
+import { renderInlineMarkdown } from '../utils/markdown'
 import { basePath, navigate } from '../utils/router'
 import type { Site, Category, FilterState } from '../types'
 
@@ -61,13 +62,17 @@ function wikiHeader(
   description: string,
   meta?: string,
   iconName: keyof typeof icons = 'library',
+  markdown = false,
 ): HTMLElement {
   const header = el('header', { class: 'wiki-header' })
   const heading = el('h1', {})
   heading.appendChild(headingIcon(iconName))
   heading.appendChild(document.createTextNode(title))
   header.appendChild(heading)
-  header.appendChild(el('p', { class: 'wiki-lead' }, description))
+  const lead = el('p', { class: 'wiki-lead' })
+  if (markdown) lead.innerHTML = renderInlineMarkdown(description)
+  else lead.textContent = description
+  header.appendChild(lead)
   if (meta) header.appendChild(el('p', { class: 'wiki-meta' }, meta))
   return header
 }
@@ -186,7 +191,7 @@ export function BrowsePage(
     ? `${pluralize(visibleSites.length, 'site')} in ${subcategory.name}`
     : `${pluralize(visibleSites.length, 'site')} across ${pluralize(populatedSections, 'section')}`
 
-  page.appendChild(wikiHeader(pageTitle, category.description, countText, iconKey(category.icon)))
+  page.appendChild(wikiHeader(pageTitle, category.description, countText, iconKey(category.icon), true))
 
   if (visibleSites.length === 0) {
     page.appendChild(emptyState(

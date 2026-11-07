@@ -38,7 +38,7 @@ export function AboutPage(sites: Site[], categories: Category[]): HTMLElement {
       title: 'Technical details',
       icon: 'settings',
       body: [
-        'Built with Vite + TypeScript. All data is static JSON.',
+        'Built with Vite + TypeScript. All content is static Markdown.',
         'No backend, no database, no authentication, no user accounts.',
         'Search is powered by Fuse.js and runs entirely in your browser.',
         'Favorites, history, and notes are stored in localStorage and never sent to a server.',

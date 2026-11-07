@@ -2,6 +2,7 @@ import { el, headingIcon } from '../../utils/dom'
 import { icon } from '../../utils/icons'
 import { basePath } from '../../utils/router'
 import { shortDesc } from '../../utils/format'
+import { renderInlineMarkdown } from '../../utils/markdown'
 import type { Category, Site, Subcategory } from '../../types'
 
 interface SiteGroup {
@@ -72,7 +73,9 @@ export function CollectionSiteRow(site: Site, isFav: boolean): HTMLElement {
   })
   item.appendChild(fav)
 
-  item.appendChild(el('span', { class: 'wiki-link-desc' }, ` – ${shortDesc(site.description, 180)}`))
+  const desc = el('span', { class: 'wiki-link-desc' })
+  desc.innerHTML = ` – ${renderInlineMarkdown(shortDesc(site.description, 180))}`
+  item.appendChild(desc)
 
   const ext = el('a', {
     class: 'wiki-link-ext',

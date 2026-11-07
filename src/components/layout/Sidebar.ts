@@ -98,7 +98,7 @@ export function Sidebar(
 
   const moreLinks: SideLink[] = [
     { label: 'About cafs', path: '/about', glyph: icon('info'), active: currentPage === 'about' },
-    { label: 'GitHub', path: 'https://github.com/6bpr/Pirated-Lib', glyph: icon('github') },
+    { label: 'GitHub', path: 'https://github.com/Prawaldev/CAFS', glyph: icon('github') },
   ]
   nav.appendChild(sideGroup('More', false, moreLinks.map(item => {
     const external = item.path.startsWith('http')

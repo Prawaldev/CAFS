@@ -6,6 +6,8 @@
 
 html {
   scroll-padding-top: calc(var(--nav-height) + 20px);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -17,6 +19,7 @@ body {
   letter-spacing: normal;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;
 }
 
 a {
@@ -647,9 +650,6 @@ summary:focus:not(:focus-visible),
   line-height: 24px;
   letter-spacing: -0.01em;
 }
-.wiki-page h2,
-.about-content h2 {
-
 .wiki-lead {
   max-width: 72ch;
   margin: 0 0 10px;
@@ -826,6 +826,12 @@ summary:focus:not(:focus-visible),
 .doc-aside-link:hover {
   border-left-color: var(--accent);
   color: var(--accent);
+  text-decoration: none;
+}
+.doc-aside-link.active {
+  border-left-color: var(--accent);
+  color: var(--accent);
+  font-weight: 500;
   text-decoration: none;
 }
 
@@ -1511,6 +1517,23 @@ body.home-layout .footer {
   .app-main { padding: 26px 20px 0; }
   body.home-layout .app-main { padding: 18px 20px 0; }
 
+  .fmhy-side-scroll { padding: 18px 12px 32px; }
+  .fmhy-side-link {
+    min-height: 40px;
+    padding: 8px 10px;
+  }
+  .fmhy-side-summary {
+    min-height: 40px;
+    padding: 8px 10px;
+  }
+
+  .navbar-menu-btn { min-height: 38px; }
+  .navbar-btn-icon {
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0;
+  }
+
   .doc-content { max-width: 100%; }
 
   .vp-hero { padding-top: 8px; }
@@ -1529,19 +1552,83 @@ body.home-layout .footer {
   }
 
   .wiki-link-ext { opacity: 0.6; }
+  .wiki-link-item {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+  .wiki-link-fav {
+    width: 28px;
+    height: 28px;
+    vertical-align: -7px;
+  }
+  .wiki-link-fav svg { width: 14px; height: 14px; }
 
   .bar-row { grid-template-columns: 92px minmax(0, 1fr) 30px; }
 }
 
 @media (max-width: 600px) {
-  .app-main { padding-inline: 16px; }
-  body.home-layout .app-main { padding-inline: 16px; }
+  .app-main { padding-inline: 14px; }
+  body.home-layout .app-main { padding-inline: 14px; }
+
+  .navbar-inner { gap: 8px; padding: 0 10px; }
+  .navbar-logo { font-size: 15px; }
+  .navbar-search {
+    height: 36px;
+    padding: 0 10px;
+  }
+  .navbar-btn-icon {
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .wiki-page h1,
+  .about-content h1 {
+    font-size: 24px;
+    line-height: 34px;
+  }
+  .wiki-page h2,
+  .about-content h2 {
+    margin-top: 26px;
+    font-size: 20px;
+    line-height: 28px;
+  }
+  .wiki-page h3,
+  .about-content h3 {
+    font-size: 18px;
+    line-height: 26px;
+  }
+  .wiki-lead,
+  .wiki-section-desc {
+    font-size: 15px;
+    line-height: 26px;
+  }
+  .wiki-link-item {
+    padding: 5px 0 5px 15px;
+    font-size: 15px;
+    line-height: 26px;
+  }
+  .wiki-link-item::before {
+    top: 5px;
+    font-size: 11px;
+    line-height: 1.65;
+  }
+  .wiki-link-desc { font-size: 15px; }
+  .wiki-link-fav { width: 30px; height: 30px; }
+  .wiki-link-fav svg { width: 15px; height: 15px; }
+  .wiki-subcat-links { font-size: 15px; line-height: 26px; }
+  .breadcrumbs { margin-bottom: 16px; }
+
+  .vp-hero-name { font-size: 30px; line-height: 38px; }
+  .vp-hero-tagline { font-size: 16px; line-height: 26px; }
+  .vp-hero-actions { gap: 8px; }
+
+  .search-overlay,
+  .settings-overlay { padding-inline: 10px; }
 
   .vp-hero-actions { align-items: stretch; }
   .vp-hero-actions .vp-button { flex: 1; }
 
   .navbar-actions { gap: 1px; }
-  .navbar-btn-icon { padding: 6px; }
   .navbar-favicon { width: 22px; height: 22px; }
   .navbar-logo { gap: 7px; }
 

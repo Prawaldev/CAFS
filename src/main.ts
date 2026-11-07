@@ -24,6 +24,7 @@ import { FavoritesPage } from './pages/Favorites'
 import { HistoryPage } from './pages/History'
 import { DashboardPage } from './pages/Dashboard'
 import { AboutPage } from './pages/About'
+import { loadCatalog } from './content/catalog'
 
 const MOBILE_BREAKPOINT = 960
 
@@ -38,12 +39,9 @@ async function init() {
   // The sidebar is an overlay on small screens, so it should never open by default there.
   if (window.innerWidth < MOBILE_BREAKPOINT) state.sidebarOpen = false
 
-  const [sitesData, catsData] = await Promise.all([
-    fetch(basePath('/data/sites.json')).then(r => r.json()),
-    fetch(basePath('/data/categories.json')).then(r => r.json()),
-  ])
-  sites = sitesData as Site[]
-  categories = catsData as Category[]
+  const catalog = loadCatalog()
+  sites = catalog.sites
+  categories = catalog.categories
 
   const root = document.querySelector('#app-slot') as HTMLElement
   if (!root) return
@@ -80,6 +78,12 @@ async function init() {
 
 let searchOverlay: HTMLElement | null = null
 let settingsOverlay: HTMLElement | null = null
+let outlineCleanup: (() => void) | null = null
+
+function teardownOutline() {
+  outlineCleanup?.()
+  outlineCleanup = null
+}
 
 function openSearch() {
   if (searchOverlay) return
@@ -327,6 +331,17 @@ function buildOutline(content: HTMLElement): HTMLElement | null {
   inner.appendChild(el('div', { class: 'doc-aside-title' }, 'On this page'))
 
   const list = el('ul', { class: 'doc-aside-list' })
+  const links = new Map<string, HTMLAnchorElement>()
+
+  const setActive = (id: string) => {
+    links.forEach((link, key) => {
+      const isActive = key === id
+      link.classList.toggle('active', isActive)
+      if (isActive) link.setAttribute('aria-current', 'location')
+      else link.removeAttribute('aria-current')
+    })
+  }
+
   headings.forEach(heading => {
     const clone = heading.cloneNode(true) as HTMLElement
     clone.querySelector('.wiki-section-count')?.remove()
@@ -339,13 +354,55 @@ function buildOutline(content: HTMLElement): HTMLElement | null {
       event.preventDefault()
       heading.scrollIntoView({ behavior: 'smooth', block: 'start' })
       history.replaceState(null, '', `#${heading.id}`)
+      setActive(heading.id)
     })
+    links.set(heading.id, link)
     item.appendChild(link)
     list.appendChild(item)
   })
 
   inner.appendChild(list)
   aside.appendChild(inner)
+
+  if (headings.length > 0) {
+    const updateActive = () => {
+      const navbar = document.querySelector('.navbar')
+      const offset = (navbar?.getBoundingClientRect().height || 64) + 24
+      let active = headings[0].id
+
+      for (const heading of headings) {
+        if (heading.getBoundingClientRect().top <= offset) active = heading.id
+        else break
+      }
+
+      const doc = document.documentElement
+      if (window.innerHeight + window.scrollY >= doc.scrollHeight - 2) {
+        active = headings[headings.length - 1].id
+      }
+
+      setActive(active)
+    }
+
+    let frame = 0
+    const onScroll = () => {
+      if (frame) return
+      frame = requestAnimationFrame(() => {
+        frame = 0
+        updateActive()
+      })
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    requestAnimationFrame(updateActive)
+
+    outlineCleanup = () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      if (frame) cancelAnimationFrame(frame)
+    }
+  }
+
   return aside
 }
 
@@ -371,6 +428,8 @@ function handleInternalLink(event: MouseEvent) {
 }
 
 function renderPage() {
+  teardownOutline()
+
   const page = getCurrentPage()
   const params = getParams()
 

@@ -1,6 +1,7 @@
 import { el } from '../utils/dom'
 import { icon, icons } from '../utils/icons'
 import { pluralize } from '../utils/format'
+import { renderInlineMarkdown } from '../utils/markdown'
 import { navigate, basePath } from '../utils/router'
 import { CollectionSiteRow } from '../components/collection/CollectionTree'
 import type { Site, Category } from '../types'
@@ -98,7 +99,9 @@ export function HomePage(sites: Site[], categories: Category[], favIds: string[]
     glyph.innerHTML = icon(featureIcons[category.id] || 'folder', 24)
     box.appendChild(glyph)
     box.appendChild(el('h2', { class: 'vp-feature-title' }, category.name))
-    box.appendChild(el('p', { class: 'vp-feature-details' }, category.description))
+    const details = el('p', { class: 'vp-feature-details' })
+    details.innerHTML = renderInlineMarkdown(category.description)
+    box.appendChild(details)
     box.appendChild(el('span', { class: 'vp-feature-link' }, `${pluralize(count, 'site')} →`))
     card.appendChild(box)
 

@@ -10,7 +10,7 @@ export interface Site {
   language: string
   requires: string
   curatorNote: string
-  featured?: boolean
+  featured?: boolean | string
   addedAt: string
   updatedAt: string
 }

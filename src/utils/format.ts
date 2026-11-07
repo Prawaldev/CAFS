@@ -12,18 +12,6 @@ export function relativeTime(dateStr: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-export function cleanUrl(url: string): string {
-  return url.replace(/^https?:\/\//, '').replace(/\/$/, '')
-}
-
-export function domainFromUrl(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, '')
-  } catch {
-    return url
-  }
-}
-
 export function pluralize(count: number, singular: string, plural?: string): string {
   return count === 1 ? `1 ${singular}` : `${count} ${plural || singular + 's'}`
 }
