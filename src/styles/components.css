@@ -992,7 +992,7 @@ a svg,
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-1);
-  font-family: var(--font-body);
+  font-family: inherit;
   font-size: var(--text-xs);
   letter-spacing: 0.08em;
   color: var(--ink-faint);
