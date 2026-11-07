@@ -91,6 +91,7 @@ subcategories:
 - [Anikuro](https://anikuro.ru/) — Multi-source anime streaming site. <!-- tags: streaming, multi; order: 273 -->
 - [aniwaves](https://aniwaves.ru/) — Anime streaming site. <!-- tags: streaming; order: 274 -->
 - [AV1 EnCodes](https://av1please.com/) — Anime streaming with AV1 encoding. <!-- tags: streaming, av1; order: 275 -->
+- [Hianime](https://hianime.at/) — Anime streaming site. <!-- tags: streaming; order 275 -->
 
 ## Scrapers & Self-Hosted {#anime-scraper}
 
