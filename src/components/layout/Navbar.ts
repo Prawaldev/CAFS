@@ -1,31 +1,47 @@
 import { el } from '../../utils/dom'
 import { navigate, basePath } from '../../utils/router'
 import { icon } from '../../utils/icons'
-import type { PageName } from '../../types'
+import type { PageName, Category } from '../../types'
+import type { DisplayMode } from '../../utils/theme'
+import { MobileNavScreen } from './MobileNavScreen'
 
 export interface NavbarCallbacks {
   onSearchOpen: () => void
-  onThemeToggle: () => void
+  onThemeChange: (theme: DisplayMode) => void
+  onColorChange: (color: string) => void
+  onPresetChange: (preset: string | null) => void
   onSettingsOpen?: () => void
-  onSidebarToggle?: () => void
 }
 
-export function Navbar(currentPage: PageName, theme: 'dark' | 'light', callbacks: NavbarCallbacks): HTMLElement {
+let mobileScreenEl: HTMLElement | null = null
+let isMobileScreenOpen = false
+
+export function closeMobileNav() {
+  if (mobileScreenEl) {
+    mobileScreenEl.remove()
+    mobileScreenEl = null
+  }
+  isMobileScreenOpen = false
+  document.body.classList.remove('nav-screen-open')
+  const hamburger = document.querySelector('.VPNavBarHamburger')
+  if (hamburger) {
+    hamburger.classList.remove('active')
+    hamburger.setAttribute('aria-expanded', 'false')
+  }
+}
+
+export function Navbar(
+  currentPage: PageName,
+  theme: DisplayMode,
+  accentColor: string,
+  themePreset: string | null,
+  categories: Category[],
+  callbacks: NavbarCallbacks,
+): HTMLElement {
   const header = el('header', { class: 'navbar', role: 'banner' })
   const inner = el('div', { class: 'navbar-inner' })
 
-  if (callbacks.onSidebarToggle) {
-    const menuBtn = el('button', {
-      class: 'navbar-menu-btn',
-      type: 'button',
-      'aria-label': 'Open navigation menu',
-      title: 'Menu',
-    })
-    menuBtn.innerHTML = `<span class="navbar-menu-icon">${icon('menu')}</span><span class="navbar-menu-text">Menu</span>`
-    menuBtn.addEventListener('click', () => callbacks.onSidebarToggle!())
-    inner.appendChild(menuBtn)
-  }
-
+  // Left: Logo only (left-side burger menu is removed as requested)
   const logo = el('a', {
     class: 'navbar-logo',
     href: basePath('/'),
@@ -34,22 +50,15 @@ export function Navbar(currentPage: PageName, theme: 'dark' | 'light', callbacks
   logo.innerHTML = `<img src="${basePath('/favicon/favicon.svg')}" class="navbar-favicon" alt="" width="24" height="24"><span class="navbar-logo-text">cafs</span>`
   logo.addEventListener('click', (e) => {
     e.preventDefault()
+    closeMobileNav()
     navigate('/')
   })
   inner.appendChild(logo)
 
-  const searchBtn = el('button', {
-    class: 'navbar-search',
-    type: 'button',
-    'aria-label': 'Search the wiki',
-    title: 'Search (Ctrl+K)',
-  })
-  searchBtn.innerHTML = `${icon('search')}<span class="navbar-search-label">Search</span><kbd>Ctrl K</kbd>`
-  searchBtn.addEventListener('click', () => callbacks.onSearchOpen())
-  inner.appendChild(searchBtn)
-
+  // Spacer between left and right elements
   inner.appendChild(el('div', { class: 'navbar-spacer' }))
 
+  // Desktop primary navigation links
   const links = el('nav', { class: 'navbar-links', 'aria-label': 'Primary navigation' })
   const navPages: Array<{ id: PageName; label: string; path: string }> = [
     { id: 'browse', label: 'Wiki', path: '/browse' },
@@ -65,29 +74,55 @@ export function Navbar(currentPage: PageName, theme: 'dark' | 'light', callbacks
     const a = el('a', {
       class: `navbar-link${isActive(p.id) ? ' active' : ''}`,
       href: basePath(p.path),
+      'aria-current': isActive(p.id) ? 'page' : undefined,
     }, p.label)
     a.addEventListener('click', (e) => {
       e.preventDefault()
+      closeMobileNav()
       navigate(p.path)
     })
     links.appendChild(a)
   })
   inner.appendChild(links)
 
+  // Right-side actions: Search button + Desktop buttons + Mobile Animated Hamburger button
   const actions = el('div', { class: 'navbar-actions' })
 
-  const themeBtn = el('button', {
-    class: 'navbar-btn-icon',
+  // Search button: On desktop shows icon + label + kbd; on mobile scaled to clean search icon button on right side!
+  const searchBtn = el('button', {
+    class: 'navbar-search',
     type: 'button',
-    title: `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`,
-    'aria-label': `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`,
+    'aria-label': 'Search the wiki (Ctrl+K)',
+    title: 'Search (Ctrl+K)',
   })
-  themeBtn.innerHTML = theme === 'dark' ? icon('sun') : icon('moon')
-  themeBtn.addEventListener('click', () => callbacks.onThemeToggle())
+  searchBtn.innerHTML = `
+    <span class="navbar-search-icon" aria-hidden="true">${icon('search', 18)}</span>
+    <span class="navbar-search-label">Search</span>
+    <kbd>Ctrl K</kbd>
+  `
+  searchBtn.addEventListener('click', () => {
+    closeMobileNav()
+    callbacks.onSearchOpen()
+  })
+  actions.appendChild(searchBtn)
+
+  // Desktop theme toggle button
+  const themeBtn = el('button', {
+    class: 'navbar-btn-icon navbar-theme-btn',
+    type: 'button',
+    title: `Switch to ${theme === 'dark' || theme === 'amoled' ? 'light' : 'dark'} mode`,
+    'aria-label': `Switch to ${theme === 'dark' || theme === 'amoled' ? 'light' : 'dark'} mode`,
+  })
+  themeBtn.innerHTML = theme === 'light' ? icon('moon') : icon('sun')
+  themeBtn.addEventListener('click', () => {
+    const nextMode: DisplayMode = theme === 'light' ? 'dark' : 'light'
+    callbacks.onThemeChange(nextMode)
+  })
   actions.appendChild(themeBtn)
 
+  // Desktop settings/appearance button
   const settingsBtn = el('button', {
-    class: 'navbar-btn-icon',
+    class: 'navbar-btn-icon navbar-settings-btn',
     type: 'button',
     title: 'Appearance',
     'aria-label': 'Appearance settings',
@@ -96,6 +131,7 @@ export function Navbar(currentPage: PageName, theme: 'dark' | 'light', callbacks
   settingsBtn.addEventListener('click', () => callbacks.onSettingsOpen?.())
   actions.appendChild(settingsBtn)
 
+  // Desktop GitHub button
   const githubBtn = el('a', {
     class: 'navbar-btn-icon navbar-github',
     href: 'https://github.com/Prawaldev/CAFS',
@@ -106,6 +142,52 @@ export function Navbar(currentPage: PageName, theme: 'dark' | 'light', callbacks
   })
   githubBtn.innerHTML = icon('github')
   actions.appendChild(githubBtn)
+
+  // Mobile Hamburger button with exact animation from https://github.com/fmhy/edit
+  const hamburgerBtn = el('button', {
+    type: 'button',
+    class: `VPNavBarHamburger${isMobileScreenOpen ? ' active' : ''}`,
+    'aria-label': 'Open mobile navigation menu',
+    'aria-expanded': isMobileScreenOpen ? 'true' : 'false',
+    title: 'Menu',
+  })
+  hamburgerBtn.innerHTML = `
+    <span class="container" aria-hidden="true">
+      <span class="top"></span>
+      <span class="middle"></span>
+      <span class="bottom"></span>
+    </span>
+  `
+
+  const toggleMobileNav = () => {
+    isMobileScreenOpen = !isMobileScreenOpen
+    hamburgerBtn.classList.toggle('active', isMobileScreenOpen)
+    hamburgerBtn.setAttribute('aria-expanded', isMobileScreenOpen ? 'true' : 'false')
+
+    if (isMobileScreenOpen) {
+      if (mobileScreenEl) mobileScreenEl.remove()
+      mobileScreenEl = MobileNavScreen(
+        currentPage,
+        theme,
+        accentColor,
+        themePreset,
+        categories,
+        {
+          onClose: closeMobileNav,
+          onChangeMode: (m) => callbacks.onThemeChange(m),
+          onChangeColor: (c) => callbacks.onColorChange(c),
+          onChangePreset: (p) => callbacks.onPresetChange(p),
+        },
+      )
+      document.body.appendChild(mobileScreenEl)
+      document.body.classList.add('nav-screen-open')
+    } else {
+      closeMobileNav()
+    }
+  }
+
+  hamburgerBtn.addEventListener('click', toggleMobileNav)
+  actions.appendChild(hamburgerBtn)
 
   inner.appendChild(actions)
   header.appendChild(inner)

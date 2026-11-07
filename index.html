@@ -21,9 +21,22 @@
     (function () {
       try {
         var saved = localStorage.getItem('piralib-theme')
-        var theme = saved ? JSON.parse(saved) : null
-        if (theme === 'light' || theme === 'dark') {
+        var theme = saved ? JSON.parse(saved) : 'dark'
+        if (theme === 'light' || theme === 'dark' || theme === 'amoled') {
           document.documentElement.dataset.theme = theme
+          document.documentElement.setAttribute('data-theme', theme)
+          if (theme === 'amoled' || theme === 'dark') {
+            document.documentElement.classList.add('dark')
+          }
+          if (theme === 'amoled') {
+            document.documentElement.classList.add('amoled')
+          }
+        }
+        var preset = localStorage.getItem('piralib-theme-preset')
+        var parsedPreset = preset ? JSON.parse(preset) : null
+        if (parsedPreset) {
+          document.documentElement.dataset.themePreset = parsedPreset
+          document.documentElement.setAttribute('data-theme-preset', parsedPreset)
         }
       } catch (error) {
         /* private mode — keep the dark default */

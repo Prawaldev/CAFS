@@ -33,25 +33,31 @@ export const DEFAULT_STATE: AppState = {
   history: [],
   recentSearches: [],
   sidebarOpen: true,
-  accentColor: 'blossom',
+  accentColor: 'swarm',
+  themePreset: null,
 }
 
 export function loadState(): AppState {
-  const storedAccent = get<string>('accent-color', 'blossom')
+  const storedAccent = get<string>('accent-color', 'swarm')
   return {
-    theme: get<'dark' | 'light'>('theme', DEFAULT_STATE.theme),
+    theme: get<'dark' | 'light' | 'amoled'>('theme', DEFAULT_STATE.theme),
     view: get<'grid' | 'list' | 'compact'>('view', DEFAULT_STATE.view),
     filters: { ...DEFAULT_FILTERS },
     favorites: get<string[]>('favorites', []),
     history: get<HistoryEntry[]>('history', []),
     recentSearches: get<string[]>('recent-searches', []),
     sidebarOpen: get<boolean>('sidebar-open', true),
-    accentColor: storedAccent === 'amber' ? 'blossom' : storedAccent,
+    accentColor: storedAccent,
+    themePreset: get<string | null>('theme-preset', null),
   }
 }
 
-export function saveTheme(theme: 'dark' | 'light') {
+export function saveTheme(theme: 'dark' | 'light' | 'amoled') {
   set('theme', theme)
+}
+
+export function saveThemePreset(preset: string | null) {
+  set('theme-preset', preset)
 }
 
 export function saveView(view: 'grid' | 'list' | 'compact') {

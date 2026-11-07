@@ -31,7 +31,6 @@ a {
   transition: color var(--transition-fast);
 }
 a:hover { color: var(--accent); text-decoration: none; }
-a:visited { color: var(--ink-soft); }
 
 button {
   font-family: inherit;

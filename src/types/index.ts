@@ -29,7 +29,7 @@ export interface Subcategory {
 }
 
 export interface AppState {
-  theme: 'dark' | 'light'
+  theme: 'dark' | 'light' | 'amoled'
   view: 'grid' | 'list' | 'compact'
   filters: FilterState
   favorites: string[]
@@ -37,6 +37,7 @@ export interface AppState {
   recentSearches: string[]
   sidebarOpen: boolean
   accentColor: string
+  themePreset: string | null
 }
 
 export interface FilterState {

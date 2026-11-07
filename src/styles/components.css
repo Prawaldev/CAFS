@@ -203,7 +203,8 @@ a svg,
   height: 100%;
 }
 
-.navbar-link {
+.navbar-link,
+.navbar-link:visited {
   font-size: var(--text-sm);
   font-weight: 400;
   color: var(--ink-dim);
@@ -215,18 +216,17 @@ a svg,
   transition: color var(--transition-fast);
   white-space: nowrap;
 }
-.navbar-link:hover {
+.navbar-link:hover,
+.navbar-link:hover:visited {
   color: var(--ink);
   text-decoration: none;
 }
 .navbar-link .icon {
   display: none;
 }
-.navbar-link.active {
+.navbar-link.active,
+.navbar-link.active:visited {
   color: var(--accent);
-}
-.navbar-link.active::before {
-  content: '>';
 }
 
 .navbar-spacer {

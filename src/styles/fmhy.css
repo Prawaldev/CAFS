@@ -33,7 +33,6 @@ a:hover {
   color: var(--accent-hover);
   text-decoration-color: currentColor;
 }
-a:visited { color: var(--accent); }
 
 ::selection {
   background: var(--selection);
@@ -171,7 +170,8 @@ summary:focus:not(:focus-visible),
 .navbar-menu-icon { display: flex; }
 .navbar-menu-text { display: none; }
 
-.navbar-logo {
+.navbar-logo,
+.navbar-logo:visited {
   display: flex;
   align-items: center;
   gap: 9px;
@@ -183,7 +183,8 @@ summary:focus:not(:focus-visible),
   letter-spacing: -0.015em;
   text-decoration: none;
 }
-.navbar-logo:hover { color: var(--ink); text-decoration: none; }
+.navbar-logo:hover,
+.navbar-logo:hover:visited { color: var(--ink); text-decoration: none; }
 
 .navbar-favicon {
   width: 24px;
@@ -239,7 +240,8 @@ summary:focus:not(:focus-visible),
   margin-left: 4px;
 }
 
-.navbar-link {
+.navbar-link,
+.navbar-link:visited {
   display: flex;
   align-items: center;
   height: 34px;
@@ -253,12 +255,14 @@ summary:focus:not(:focus-visible),
   white-space: nowrap;
   transition: color 0.15s ease, background 0.15s ease;
 }
-.navbar-link:hover {
+.navbar-link:hover,
+.navbar-link:hover:visited {
   color: var(--ink);
   background: var(--surface);
   text-decoration: none;
 }
-.navbar-link.active {
+.navbar-link.active,
+.navbar-link.active:visited {
   color: var(--accent);
   background: var(--accent-soft);
 }
@@ -284,6 +288,329 @@ summary:focus:not(:focus-visible),
 .navbar-btn-icon:hover {
   background: var(--surface);
   color: var(--ink);
+}
+
+/* ─── HAMBURGER (Matched to https://github.com/fmhy/edit) ───────────────── */
+
+.VPNavBarHamburger {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: color 0.25s ease, background-color 0.2s ease;
+}
+.VPNavBarHamburger:hover {
+  background: var(--surface);
+}
+
+@media (min-width: 960px) {
+  .VPNavBarHamburger {
+    display: none !important;
+  }
+}
+
+.VPNavBarHamburger .container {
+  position: relative;
+  width: 16px;
+  height: 14px;
+  overflow: hidden;
+}
+
+.VPNavBarHamburger .top,
+.VPNavBarHamburger .middle,
+.VPNavBarHamburger .bottom {
+  position: absolute;
+  left: 0;
+  width: 16px;
+  height: 2px;
+  background-color: var(--ink);
+  border-radius: 1px;
+  transition: top 0.25s cubic-bezier(0.2, 0, 0, 1), background-color 0.25s ease, transform 0.25s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.VPNavBarHamburger .top    { top: 0; transform: translateX(0); }
+.VPNavBarHamburger .middle { top: 6px; transform: translateX(0); }
+.VPNavBarHamburger .bottom { top: 12px; transform: translateX(0); }
+
+.VPNavBarHamburger:hover .top    { top: 0; transform: translateX(4px); }
+.VPNavBarHamburger:hover .middle { top: 6px; transform: translateX(0); }
+.VPNavBarHamburger:hover .bottom { top: 12px; transform: translateX(8px); }
+
+.VPNavBarHamburger.active .top    { top: 6px; transform: translateX(0) rotate(225deg); }
+.VPNavBarHamburger.active .middle { top: 6px; transform: translateX(18px); opacity: 0; }
+.VPNavBarHamburger.active .bottom { top: 6px; transform: translateX(0) rotate(135deg); }
+
+.VPNavBarHamburger.active:hover .top,
+.VPNavBarHamburger.active:hover .middle,
+.VPNavBarHamburger.active:hover .bottom {
+  background-color: var(--accent);
+}
+
+/* ─── MOBILE NAV SCREEN (Matched to https://github.com/fmhy/edit) ────────── */
+
+.VPNavScreen {
+  position: fixed;
+  top: var(--nav-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 290;
+  background: var(--bg);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px 20px 60px;
+  animation: navScreenFadeIn 0.22s cubic-bezier(0.2, 0, 0, 1);
+  display: block;
+}
+
+@keyframes navScreenFadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (min-width: 960px) {
+  .VPNavScreen {
+    display: none !important;
+  }
+}
+
+body.nav-screen-open {
+  overflow: hidden !important;
+}
+
+.VPNavScreen-container {
+  max-width: 20rem;
+  margin: 0 auto;
+}
+
+.VPNavScreen-menu {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.VPNavScreen-link {
+  display: block;
+  border-bottom: 1px solid var(--line);
+  padding: 13px 4px;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-decoration: none;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.VPNavScreen-link:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+.VPNavScreen-link.active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.VPNavScreen-cat-group {
+  border-bottom: 1px solid var(--line);
+}
+.VPNavScreen-cat-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 4px;
+  color: var(--ink-dim);
+  font-size: 14.5px;
+  font-weight: 500;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.VPNavScreen-cat-summary::-webkit-details-marker { display: none; }
+.VPNavScreen-cat-caret {
+  display: flex;
+  transition: transform 0.2s ease;
+}
+.VPNavScreen-cat-group[open] .VPNavScreen-cat-caret {
+  transform: rotate(90deg);
+}
+.VPNavScreen-cat-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  padding: 6px 0 14px;
+}
+.VPNavScreen-cat-link {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink-dim);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.VPNavScreen-cat-link:hover {
+  background: var(--surface-raised);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.VPNavScreen-appearance {
+  margin-top: 8px;
+}
+
+/* ─── APPEARANCE PANEL & PRESETS ────────────────────────────────────────── */
+
+.appearance-section {
+  width: 100%;
+}
+.appearance-group {
+  margin-bottom: 18px;
+}
+.appearance-group-title {
+  padding: 4px 0 8px;
+  color: var(--ink-faint);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.appearance-mode-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.appearance-mode-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink-dim);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.appearance-mode-btn:hover {
+  border-color: var(--line-bright);
+  color: var(--ink);
+  background: var(--surface-raised);
+}
+.appearance-mode-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+.appearance-mode-icon {
+  display: flex;
+  align-items: center;
+}
+.appearance-mode-check {
+  display: flex;
+  align-items: center;
+  margin-left: 2px;
+}
+
+.appearance-divider {
+  height: 1px;
+  margin: 16px 0;
+  background: var(--line);
+}
+
+.appearance-swatch-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.appearance-swatch-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  border: 0;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.appearance-swatch-btn:hover {
+  transform: scale(1.12);
+}
+.appearance-swatch-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 0.15s ease;
+}
+.appearance-swatch-btn.active .appearance-swatch-circle {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+}
+.appearance-swatch-check {
+  display: flex;
+  color: #ffffff;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.85));
+}
+
+.appearance-swatch-grid.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.appearance-swatch-btn.preset {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  transition: all 0.15s ease;
+}
+.appearance-swatch-btn.preset:hover {
+  transform: none;
+  border-color: var(--line-bright);
+  background: var(--surface-raised);
+}
+.appearance-swatch-btn.preset.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.appearance-swatch-btn.preset .appearance-swatch-circle {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.appearance-swatch-btn.preset.active .appearance-swatch-circle {
+  box-shadow: none;
+}
+.appearance-preset-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.appearance-swatch-btn.preset.active .appearance-preset-label {
+  color: var(--accent);
+  font-weight: 600;
 }
 
 /* ─── SIDEBAR ───────────────────────────────────────────────────────────── */
@@ -312,7 +639,8 @@ summary:focus:not(:focus-visible),
   border-bottom: 1px solid var(--line-soft);
 }
 
-.fmhy-side-link {
+.fmhy-side-link,
+.fmhy-side-link:visited {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -326,12 +654,14 @@ summary:focus:not(:focus-visible),
   text-decoration: none;
   transition: background 0.15s ease, color 0.15s ease;
 }
-.fmhy-side-link:hover {
+.fmhy-side-link:hover,
+.fmhy-side-link:hover:visited {
   color: var(--ink);
   background: var(--surface);
   text-decoration: none;
 }
-.fmhy-side-link.active {
+.fmhy-side-link.active,
+.fmhy-side-link.active:visited {
   color: var(--accent);
   background: var(--accent-soft);
 }
@@ -812,7 +1142,8 @@ summary:focus:not(:focus-visible),
 
 .doc-aside-item { margin: 0; }
 
-.doc-aside-link {
+.doc-aside-link,
+.doc-aside-link:visited {
   display: block;
   margin-left: -1px;
   padding: 4px 0 4px 12px;
@@ -823,12 +1154,14 @@ summary:focus:not(:focus-visible),
   line-height: 32px;
   text-decoration: none;
 }
-.doc-aside-link:hover {
+.doc-aside-link:hover,
+.doc-aside-link:hover:visited {
   border-left-color: var(--accent);
   color: var(--accent);
   text-decoration: none;
 }
-.doc-aside-link.active {
+.doc-aside-link.active,
+.doc-aside-link.active:visited {
   border-left-color: var(--accent);
   color: var(--accent);
   font-weight: 500;
@@ -844,7 +1177,8 @@ summary:focus:not(:focus-visible),
   border-top: 1px solid var(--line);
 }
 
-.doc-pager-link {
+.doc-pager-link,
+.doc-pager-link:visited {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -852,7 +1186,8 @@ summary:focus:not(:focus-visible),
   color: var(--ink-dim);
   text-decoration: none;
 }
-.doc-pager-link:hover { color: var(--accent); text-decoration: none; }
+.doc-pager-link:hover,
+.doc-pager-link:hover:visited { color: var(--accent); text-decoration: none; }
 .doc-pager-link.next {
   margin-left: auto;
   text-align: right;
@@ -881,15 +1216,18 @@ summary:focus:not(:focus-visible),
   font-size: 12px;
   line-height: 1.6;
 }
-.breadcrumb-item {
+.breadcrumb-item,
+.breadcrumb-item:visited {
   color: var(--ink-faint);
   text-decoration: none;
 }
-.breadcrumb-item:hover {
+.breadcrumb-item:hover,
+.breadcrumb-item:hover:visited {
   color: var(--accent);
   text-decoration: underline;
 }
-.breadcrumb-item.current { color: var(--ink-dim); }
+.breadcrumb-item.current,
+.breadcrumb-item.current:visited { color: var(--ink-dim); }
 .breadcrumb-sep { color: var(--line-bright); }
 
 .btn {
@@ -1474,20 +1812,52 @@ body.home-layout .footer {
 }
 
 @media (max-width: 959px) {
-  .navbar-inner { gap: 10px; padding: 0 14px; }
+  .navbar-inner {
+    padding: 0 16px;
+    gap: 8px;
+  }
 
-  .navbar-menu-btn { display: flex; }
+  .navbar-menu-btn {
+    display: none !important;
+  }
 
   .navbar-search {
-    width: auto;
-    padding: 0 8px;
-    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ink-dim);
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .navbar-search:hover {
+    background: var(--surface);
+    color: var(--ink);
   }
   .navbar-search-label,
-  .navbar-search kbd { display: none; }
+  .navbar-search kbd {
+    display: none !important;
+  }
+  .navbar-search-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .navbar-search-icon svg {
+    width: 18px;
+    height: 18px;
+  }
 
-  .navbar-links { display: none; }
-  .navbar-github { display: none; }
+  .navbar-links,
+  .navbar-theme-btn,
+  .navbar-settings-btn,
+  .navbar-github {
+    display: none !important;
+  }
 
   .app-layout { display: block; }
 

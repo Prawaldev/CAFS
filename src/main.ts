@@ -8,12 +8,12 @@ import './styles/utilities.css'
 import './styles/fmhy.css'
 
 import type { Site, Category, AppState, PageName } from './types'
-import { loadState, saveTheme, saveFavorites, saveHistory, saveRecentSearches, saveSidebarOpen, saveAccentColor, detectSiteChanges, DEFAULT_STATE } from './utils/storage'
+import { loadState, saveTheme, saveFavorites, saveHistory, saveRecentSearches, saveSidebarOpen, saveAccentColor, saveThemePreset, detectSiteChanges, DEFAULT_STATE } from './utils/storage'
 import { initSearch } from './utils/search'
 import { initRouter, registerRoute, navigate, basePath, stripBase, getCurrentPage, setCurrentPage, getParams } from './utils/router'
 import { initKeyboard, onKey } from './utils/keyboard'
 import { el, render } from './utils/dom'
-import { Navbar } from './components/layout/Navbar'
+import { Navbar, closeMobileNav } from './components/layout/Navbar'
 import { Footer } from './components/layout/Footer'
 import { Sidebar } from './components/layout/Sidebar'
 import { SearchOverlay } from './components/search/SearchOverlay'
@@ -25,6 +25,7 @@ import { HistoryPage } from './pages/History'
 import { DashboardPage } from './pages/Dashboard'
 import { AboutPage } from './pages/About'
 import { loadCatalog } from './content/catalog'
+import { applyTheme, type DisplayMode } from './utils/theme'
 
 const MOBILE_BREAKPOINT = 960
 
@@ -56,7 +57,11 @@ async function init() {
   document.documentElement.setAttribute('data-theme', state.theme)
   applySettings()
 
-  registerRoute(/^\/$/, () => { setCurrentPage('home'); renderPage() })
+  registerRoute(/^\/$/, () => {
+    setCurrentPage('home')
+    state.filters = { ...DEFAULT_STATE.filters }
+    renderPage()
+  })
   registerRoute(/^\/browse(?:\?.*)?$/, (params) => {
     setCurrentPage('browse')
     state.filters.category = params.category || null
@@ -64,13 +69,29 @@ async function init() {
     state.filters.query = params.q || ''
     renderPage()
   })
-  registerRoute(/^\/favorites\/?$/, () => { setCurrentPage('favorites'); renderPage() })
-  registerRoute(/^\/history\/?$/, () => { setCurrentPage('history'); renderPage() })
-  registerRoute(/^\/dashboard\/?$/, () => { setCurrentPage('dashboard'); renderPage() })
-  registerRoute(/^\/about\/?$/, () => { setCurrentPage('about'); renderPage() })
+  registerRoute(/^\/favorites\/?$/, () => {
+    setCurrentPage('favorites')
+    state.filters = { ...DEFAULT_STATE.filters }
+    renderPage()
+  })
+  registerRoute(/^\/history\/?$/, () => {
+    setCurrentPage('history')
+    state.filters = { ...DEFAULT_STATE.filters }
+    renderPage()
+  })
+  registerRoute(/^\/dashboard\/?$/, () => {
+    setCurrentPage('dashboard')
+    state.filters = { ...DEFAULT_STATE.filters }
+    renderPage()
+  })
+  registerRoute(/^\/about\/?$/, () => {
+    setCurrentPage('about')
+    state.filters = { ...DEFAULT_STATE.filters }
+    renderPage()
+  })
 
   onKey('Ctrl+k', (e) => { e.preventDefault(); openSearch() })
-  onKey('Escape', () => { closeSearchIfOpen() })
+  onKey('Escape', () => { closeSearchIfOpen(); closeMobileNav() })
 
   document.addEventListener('click', handleInternalLink)
   initRouter()
@@ -110,11 +131,9 @@ function closeSearchIfOpen() {
 function openSettings() {
   if (settingsOverlay) return
   settingsOverlay = SettingsPanel(state, {
-    onChangeAccent: (color) => {
-      state.accentColor = color
-      saveAccentColor(color)
-      applySettings()
-    },
+    onChangeMode: handleThemeChange,
+    onChangeColor: handleColorChange,
+    onChangePreset: handlePresetChange,
     onClose: closeSettings,
   })
   document.body.appendChild(settingsOverlay)
@@ -127,42 +146,31 @@ function closeSettings() {
   }
 }
 
-function toggleTheme() {
-  state.theme = state.theme === 'dark' ? 'light' : 'dark'
-  document.documentElement.setAttribute('data-theme', state.theme)
-  saveTheme(state.theme)
+function handleThemeChange(mode: DisplayMode) {
+  state.theme = mode
+  saveTheme(mode)
+  applySettings()
+  renderPage()
+}
+
+function handleColorChange(color: string) {
+  state.accentColor = color
+  state.themePreset = null
+  saveAccentColor(color)
+  saveThemePreset(null)
+  applySettings()
+  renderPage()
+}
+
+function handlePresetChange(preset: string | null) {
+  state.themePreset = preset
+  saveThemePreset(preset)
   applySettings()
   renderPage()
 }
 
 function applySettings() {
-  const root = document.documentElement
-
-  const accentMap: Record<string, { dark: string; light: string }> = {
-    blossom: { dark: '#7bc5e4', light: '#3f7f9e' },
-    lilac:   { dark: '#c4b5fd', light: '#6d5ac2' },
-    sky:     { dark: '#7aa2f7', light: '#3e63b0' },
-    sage:    { dark: '#8fd48f', light: '#3d7a3d' },
-    gold:    { dark: '#e8d06f', light: '#8a7330' },
-    rose:    { dark: '#f4a7b9', light: '#9b4058' },
-  }
-  const palette = accentMap[state.accentColor] || accentMap.blossom
-  const color = state.theme === 'light' ? palette.light : palette.dark
-  root.style.setProperty('--accent', color)
-  root.style.setProperty('--accent-hover', adjustColor(color, 20))
-  root.style.setProperty('--accent-dim', adjustColor(color, -40))
-  root.style.setProperty('--accent-soft', `color-mix(in srgb, ${color} 14%, transparent)`)
-  root.style.setProperty('--signal', color)
-  root.style.setProperty('--signal-dim', adjustColor(color, -30))
-  root.style.setProperty('--link', color)
-}
-
-function adjustColor(hex: string, amount: number): string {
-  const num = parseInt(hex.replace('#', ''), 16)
-  const r = Math.min(255, Math.max(0, ((num >> 16) & 255) + amount))
-  const g = Math.min(255, Math.max(0, ((num >> 8) & 255) + amount))
-  const b = Math.min(255, Math.max(0, (num & 255) + amount))
-  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
+  applyTheme(state.theme, state.accentColor, state.themePreset)
 }
 
 function trackVisit(id: string) {
@@ -440,12 +448,20 @@ function renderPage() {
   const currentUrl = window.location.pathname + window.location.search
   const prevUrl = document.body.dataset.lastUrl
 
-  const navbar = Navbar(page, state.theme, {
-    onSearchOpen: openSearch,
-    onThemeToggle: toggleTheme,
-    onSettingsOpen: openSettings,
-    onSidebarToggle: toggleSidebar,
-  })
+  const navbar = Navbar(
+    page,
+    state.theme,
+    state.accentColor,
+    state.themePreset,
+    categories,
+    {
+      onSearchOpen: openSearch,
+      onThemeChange: handleThemeChange,
+      onColorChange: handleColorChange,
+      onPresetChange: handlePresetChange,
+      onSettingsOpen: openSettings,
+    },
+  )
 
   let content: HTMLElement
 
@@ -534,7 +550,10 @@ function renderPage() {
 
 window.addEventListener('resize', () => {
   if (!state) return
-  if (window.innerWidth >= MOBILE_BREAKPOINT) state.sidebarOpen = false
+  if (window.innerWidth >= MOBILE_BREAKPOINT) {
+    state.sidebarOpen = false
+    closeMobileNav()
+  }
   updateSidebar()
 })
 
