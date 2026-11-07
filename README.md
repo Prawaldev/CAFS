@@ -1,7 +1,7 @@
 # cafs
 
 <p align="center">
-  <img src="public/favicon/favicon.svg" width="72" alt="cafs logo">
+  <img src="public/favicon/favicon.svg" width="100" alt="cafs logo">
 </p>
 
 <h1 align="center">cafs</h1>
@@ -20,13 +20,13 @@
 
 ---
 
-## <img src="https://api.iconify.design/lucide/info.svg?color=%238b949e" width="17" align="absmiddle"> About
+## <img src="public/icons/info.svg" width="22" align="absmiddle" alt="Info"> About
 
 cafs is an archive and discovery hub, not a search engine.
 
 Think of it as a vetted collection of useful websites. Every entry is manually reviewed before being listed, and resources are removed when they stop being useful.
 
-## <img src="https://api.iconify.design/lucide/star.svg?color=%238b949e" width="17" align="absmiddle"> Curation
+## <img src="public/icons/star.svg" width="22" align="absmiddle" alt="Star"> Curation
 
 Every site is manually reviewed. Selection criteria include:
 
@@ -46,7 +46,7 @@ Featured entries are marked with a star.
 - Personal notes stored locally.
 - Multiple layouts for browsing resources.
 
-## <img src="https://api.iconify.design/lucide/settings.svg?color=%238b949e" width="17" align="absmiddle"> Technical details
+## <img src="public/icons/settings.svg" width="22" align="absmiddle" alt="Settings"> Technical details
 
 | Technology | Purpose |
 |---|---|
@@ -68,11 +68,11 @@ cafs is a static frontend application.
 
 Search runs entirely in your browser. Favorites, history and notes are stored in `localStorage` and never sent to a server.
 
-## <img src="https://api.iconify.design/lucide/bar-chart-3.svg?color=%238b949e" width="17" align="absmiddle"> Current status
+## <img src="public/icons/barChart3.svg" width="22" align="absmiddle" alt="Statistics"> Current status
 
 A growing collection of curated resources across multiple categories.
 
-## <img src="https://api.iconify.design/lucide/github.svg?color=%238b949e" width="17" align="absmiddle"> Contributing
+## <img src="public/icons/github.svg" width="22" align="absmiddle" alt="GitHub"> Contributing
 
 Suggestions, corrections and contributions are welcome.
 
