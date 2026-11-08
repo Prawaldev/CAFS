@@ -108,7 +108,7 @@
   --layout-max-width: 1440px;
   --doc-width: 688px;
   --doc-aside-width: 224px;
-  --doc-gap: 32px;
+  --doc-aside-box: 256px;
   --bg-soft: #1f1f1f;
   --nav-bg: rgba(26, 26, 26, 0.92);
 

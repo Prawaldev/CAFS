@@ -7,7 +7,7 @@
 <h1 align="center">cafs</h1>
 
 <p align="center">
-  A curated index of the best anime, manga, reading, gaming and tool resources on the internet.
+  A curated index of anime, manga, reading, gaming and tool resources on the internet.
 </p>
 
 <p align="center">
@@ -22,7 +22,7 @@
 
 ## <img src="public/icons/info.svg" width="22" align="absmiddle" alt="Info"> About
 
-cafs is an archive and discovery hub, not a search engine.
+cafs is an archive and discovery hub.
 
 Think of it as a vetted collection of useful websites. Every entry is manually reviewed before being listed, and resources are removed when they stop being useful.
 
@@ -35,15 +35,11 @@ Every site is manually reviewed. Selection criteria include:
 - Genuine utility
 - Community reputation
 
-Featured entries are marked with a star.
-
 ## Features
 
 - Curated anime, manga, reading, gaming and tool resources.
-- Fast client-side search powered by Fuse.js.
 - Favorites to save useful websites.
 - Browsing history to revisit previously accessed resources.
-- Personal notes stored locally.
 - Multiple layouts for browsing resources.
 
 ## <img src="public/icons/settings.svg" width="22" align="absmiddle" alt="Settings"> Technical details
@@ -66,7 +62,7 @@ cafs is a static frontend application.
 - No user accounts
 - No server-side search
 
-Search runs entirely in your browser. Favorites, history and notes are stored in `localStorage` and never sent to a server.
+Search runs entirely in your browser. Favorites, and history are stored in `localStorage` and never sent to a server.
 
 ## <img src="public/icons/barChart3.svg" width="22" align="absmiddle" alt="Statistics"> Current status
 

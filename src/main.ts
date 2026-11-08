@@ -15,6 +15,7 @@ import { el, render } from './utils/dom'
 import { Navbar, closeMobileNav } from './components/layout/Navbar'
 import { Footer } from './components/layout/Footer'
 import { Sidebar } from './components/layout/Sidebar'
+import { LocalNav } from './components/layout/LocalNav'
 import { SearchOverlay } from './components/search/SearchOverlay'
 import { SettingsPanel } from './components/settings/SettingsPanel'
 import { HomePage } from './pages/Home'
@@ -90,7 +91,15 @@ async function init() {
   })
 
   onKey('Ctrl+k', (e) => { e.preventDefault(); openSearch() })
-  onKey('Escape', () => { closeSearchIfOpen(); closeMobileNav() })
+  onKey('Escape', () => { closeSearchIfOpen(); closeMobileNav(); closeOutlinePanel() })
+
+  window.addEventListener('cafs-outline-toggle', openOutlinePanel)
+  document.addEventListener('click', (event) => {
+    if (!outlinePanel) return
+    const trigger = (event.target as Element)?.closest('.local-nav-outline')
+    if (trigger) return
+    if (!outlinePanel.contains(event.target as Node)) closeOutlinePanel()
+  })
 
   document.addEventListener('click', handleInternalLink)
   initRouter()
@@ -99,10 +108,12 @@ async function init() {
 let searchOverlay: HTMLElement | null = null
 let settingsOverlay: HTMLElement | null = null
 let outlineCleanup: (() => void) | null = null
+let mobileOutline: Array<{ id: string; label: string }> = []
 
 function teardownOutline() {
   outlineCleanup?.()
   outlineCleanup = null
+  closeOutlinePanel()
 }
 
 function openSearch() {
@@ -125,6 +136,37 @@ function closeSearch() {
 
 function closeSearchIfOpen() {
   if (searchOverlay) closeSearch()
+}
+
+// Mobile "On this page" drop panel, fed by the page outline built in renderPage.
+let outlinePanel: HTMLElement | null = null
+
+function closeOutlinePanel() {
+  if (!outlinePanel) return
+  outlinePanel.remove()
+  outlinePanel = null
+}
+
+function openOutlinePanel() {
+  if (outlinePanel) {
+    closeOutlinePanel()
+    return
+  }
+  if (mobileOutline.length === 0) return
+
+  const panel = el('div', { class: 'nav-outline-panel', 'aria-label': 'On this page' })
+  panel.appendChild(el('div', { class: 'nav-outline-title' }, 'On this page'))
+  mobileOutline.forEach(item => {
+    const btn = el('button', { class: 'nav-outline-item', type: 'button' }, item.label)
+    btn.addEventListener('click', () => {
+      closeOutlinePanel()
+      document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      history.replaceState(null, '', `#${item.id}`)
+    })
+    panel.appendChild(btn)
+  })
+  outlinePanel = panel
+  document.body.appendChild(panel)
 }
 
 function openSettings() {
@@ -331,7 +373,10 @@ function buildPager(page: PageName): HTMLElement | null {
 
 function buildOutline(content: HTMLElement): HTMLElement | null {
   const headings = Array.from(content.querySelectorAll<HTMLElement>('h2[id]'))
-  if (headings.length === 0) return null
+  if (headings.length === 0) {
+    mobileOutline = []
+    return null
+  }
 
   const aside = el('aside', { class: 'doc-aside', 'aria-label': 'On this page' })
   const inner = el('div', { class: 'doc-aside-inner' })
@@ -339,6 +384,7 @@ function buildOutline(content: HTMLElement): HTMLElement | null {
 
   const list = el('ul', { class: 'doc-aside-list' })
   const links = new Map<string, HTMLAnchorElement>()
+  const mobileItems: Array<{ id: string; label: string }> = []
 
   const setActive = (id: string) => {
     links.forEach((link, key) => {
@@ -348,12 +394,12 @@ function buildOutline(content: HTMLElement): HTMLElement | null {
       else link.removeAttribute('aria-current')
     })
   }
-
   headings.forEach(heading => {
     const clone = heading.cloneNode(true) as HTMLElement
     clone.querySelector('.wiki-section-count')?.remove()
     clone.querySelector('.wiki-heading-icon')?.remove()
     const label = clone.textContent?.trim() || heading.id
+    mobileItems.push({ id: heading.id, label })
 
     const item = el('li', { class: 'doc-aside-item' })
     const link = el('a', { class: 'doc-aside-link', href: `#${heading.id}` }, label)
@@ -370,6 +416,9 @@ function buildOutline(content: HTMLElement): HTMLElement | null {
 
   inner.appendChild(list)
   aside.appendChild(inner)
+  aside.appendChild(el('div', { class: 'doc-aside-curtain', 'aria-hidden': 'true' }))
+
+  mobileOutline = mobileItems
 
   if (headings.length > 0) {
     const updateActive = () => {
@@ -439,10 +488,10 @@ function renderPage() {
 
   const page = getCurrentPage()
   const params = getParams()
+  document.body.dataset.page = page
 
   const root = document.querySelector('#app-slot') as HTMLElement | null
   if (!root) return
-
   const prevSidebarScroll = document.querySelector('.fmhy-side-scroll')?.scrollTop ?? 0
   const currentUrl = window.location.pathname + window.location.search
   const prevUrl = document.body.dataset.lastUrl
@@ -511,14 +560,20 @@ function renderPage() {
   })
   layout.appendChild(sidebar)
 
-  const main = el('main', { class: 'app-main animate-fade-in', role: 'main' })
+  const main = el('main', { class: 'app-main', role: 'main' })
   const doc = el('div', { class: 'doc-layout' })
-  const contentWrap = el('div', { class: 'doc-content' })
-  contentWrap.appendChild(content)
+  const contentWrap = el('div', { class: 'doc-content animate-fade-in' })
+  const contentColumn = el('div', { class: 'doc-content-column' })
+  contentColumn.appendChild(content)
 
   if (!isHome) {
     const pager = buildPager(page)
-    if (pager) contentWrap.appendChild(pager)
+    if (pager) contentColumn.appendChild(pager)
+  }
+  contentWrap.appendChild(contentColumn)
+  if (page === 'browse') {
+    // Sticky local nav (mobile): burger → sidebar drawer, right → "On this page".
+    contentWrap.prepend(LocalNav(page, categories, sites, state.filters))
   }
   doc.appendChild(contentWrap)
 
@@ -536,6 +591,8 @@ function renderPage() {
 
   render(root, layout)
 
+  document.body.classList.toggle('has-outline', !isHome && mobileOutline.length > 0)
+
   const newSidebar = document.querySelector('.fmhy-side-scroll')
   if (newSidebar) newSidebar.scrollTop = prevSidebarScroll
 
@@ -552,6 +609,7 @@ window.addEventListener('resize', () => {
   if (window.innerWidth >= MOBILE_BREAKPOINT) {
     state.sidebarOpen = false
     closeMobileNav()
+    closeOutlinePanel()
   }
   updateSidebar()
 })

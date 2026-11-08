@@ -1,9 +1,10 @@
 import { el } from '../../utils/dom'
 import { navigate, basePath } from '../../utils/router'
 import { icon } from '../../utils/icons'
-import type { PageName, Category } from '../../types'
+import type { PageName, Category, Site, FilterState } from '../../types'
 import type { DisplayMode } from '../../utils/theme'
 import { MobileNavScreen } from './MobileNavScreen'
+import { MobileSidebarScreen } from './MobileSidebarScreen'
 
 export interface NavbarCallbacks {
   onSearchOpen: () => void
@@ -14,6 +15,7 @@ export interface NavbarCallbacks {
 }
 
 let mobileScreenEl: HTMLElement | null = null
+let mobileBackdropEl: HTMLElement | null = null
 let isMobileScreenOpen = false
 
 export function closeMobileNav() {
@@ -21,12 +23,73 @@ export function closeMobileNav() {
     mobileScreenEl.remove()
     mobileScreenEl = null
   }
+  if (mobileBackdropEl) {
+    mobileBackdropEl.remove()
+    mobileBackdropEl = null
+  }
   isMobileScreenOpen = false
   document.body.classList.remove('nav-screen-open')
   const hamburger = document.querySelector('.VPNavBarHamburger')
   if (hamburger) {
     hamburger.classList.remove('active')
     hamburger.setAttribute('aria-expanded', 'false')
+  }
+}
+
+export function isMobileNavOpen() {
+  return isMobileScreenOpen
+}
+
+// Original burger behaviour (kept for the home screen and every non-wiki page):
+// the full-height nav screen opens under the navbar, no backdrop.
+function openNavScreen(
+  open: boolean,
+  currentPage: PageName,
+  theme: DisplayMode,
+  accentColor: string,
+  themePreset: string | null,
+  categories: Category[],
+  callbacks: NavbarCallbacks,
+) {
+  if (open === isMobileScreenOpen) return
+  isMobileScreenOpen = open
+
+  if (open) {
+    mobileScreenEl?.remove()
+    mobileScreenEl = MobileNavScreen(currentPage, theme, accentColor, themePreset, categories, {
+      onClose: closeMobileNav,
+      onChangeMode: (m) => callbacks.onThemeChange(m),
+      onChangeColor: (c) => callbacks.onColorChange(c),
+      onChangePreset: (p) => callbacks.onPresetChange(p),
+    })
+    document.body.appendChild(mobileScreenEl)
+    document.body.classList.add('nav-screen-open')
+  } else {
+    closeMobileNav()
+  }
+}
+
+// Local-nav burger (wiki pages): opens the LEFT drawer that carries the same
+// content the desktop sidebar stores, over a dimmed backdrop.
+export function toggleMobileSidebar(
+  currentPage: PageName,
+  categories: Category[],
+  sites: Site[],
+  filters: FilterState,
+) {
+  const open = !isMobileScreenOpen
+  isMobileScreenOpen = open
+
+  if (open) {
+    mobileScreenEl?.remove()
+    mobileScreenEl = MobileSidebarScreen(currentPage, categories, sites, filters, closeMobileNav)
+    document.body.appendChild(mobileScreenEl)
+    mobileBackdropEl = el('div', { class: 'nav-screen-backdrop' })
+    mobileBackdropEl.addEventListener('click', closeMobileNav)
+    document.body.appendChild(mobileBackdropEl)
+    document.body.classList.add('nav-screen-open')
+  } else {
+    closeMobileNav()
   }
 }
 
@@ -41,7 +104,7 @@ export function Navbar(
   const header = el('header', { class: 'navbar', role: 'banner' })
   const inner = el('div', { class: 'navbar-inner' })
 
-  // Left: Logo only (left-side burger menu is removed as requested)
+  // Left: Logo only (on wiki pages the burger lives in the local nav instead)
   const logo = el('a', {
     class: 'navbar-logo',
     href: basePath('/'),
@@ -143,51 +206,31 @@ export function Navbar(
   githubBtn.innerHTML = icon('github')
   actions.appendChild(githubBtn)
 
-  // Mobile Hamburger button with exact animation from https://github.com/fmhy/edit
-  const hamburgerBtn = el('button', {
-    type: 'button',
-    class: `VPNavBarHamburger${isMobileScreenOpen ? ' active' : ''}`,
-    'aria-label': 'Open mobile navigation menu',
-    'aria-expanded': isMobileScreenOpen ? 'true' : 'false',
-    title: 'Menu',
-  })
-  hamburgerBtn.innerHTML = `
-    <span class="container" aria-hidden="true">
-      <span class="top"></span>
-      <span class="middle"></span>
-      <span class="bottom"></span>
-    </span>
-  `
-
-  const toggleMobileNav = () => {
-    isMobileScreenOpen = !isMobileScreenOpen
-    hamburgerBtn.classList.toggle('active', isMobileScreenOpen)
-    hamburgerBtn.setAttribute('aria-expanded', isMobileScreenOpen ? 'true' : 'false')
-
-    if (isMobileScreenOpen) {
-      if (mobileScreenEl) mobileScreenEl.remove()
-      mobileScreenEl = MobileNavScreen(
-        currentPage,
-        theme,
-        accentColor,
-        themePreset,
-        categories,
-        {
-          onClose: closeMobileNav,
-          onChangeMode: (m) => callbacks.onThemeChange(m),
-          onChangeColor: (c) => callbacks.onColorChange(c),
-          onChangePreset: (p) => callbacks.onPresetChange(p),
-        },
-      )
-      document.body.appendChild(mobileScreenEl)
-      document.body.classList.add('nav-screen-open')
-    } else {
-      closeMobileNav()
-    }
+  // On wiki (browse) pages the mobile burger is provided by the sticky local
+  // nav below the navbar, so only non-wiki pages get the actions burger back.
+  if (currentPage !== 'browse') {
+    const hamburgerBtn = el('button', {
+      type: 'button',
+      class: `VPNavBarHamburger${isMobileScreenOpen ? ' active' : ''}`,
+      'aria-label': 'Open mobile navigation menu',
+      'aria-expanded': isMobileScreenOpen ? 'true' : 'false',
+      title: 'Menu',
+    })
+    hamburgerBtn.innerHTML = `
+      <span class="container" aria-hidden="true">
+        <span class="top"></span>
+        <span class="middle"></span>
+        <span class="bottom"></span>
+      </span>
+    `
+    hamburgerBtn.addEventListener('click', () => {
+      const open = !isMobileScreenOpen
+      openNavScreen(open, currentPage, theme, accentColor, themePreset, categories, callbacks)
+      hamburgerBtn.classList.toggle('active', open)
+      hamburgerBtn.setAttribute('aria-expanded', open ? 'true' : 'false')
+    })
+    actions.appendChild(hamburgerBtn)
   }
-
-  hamburgerBtn.addEventListener('click', toggleMobileNav)
-  actions.appendChild(hamburgerBtn)
 
   inner.appendChild(actions)
   header.appendChild(inner)

@@ -95,35 +95,59 @@ summary:focus:not(:focus-visible),
 .doc-layout {
   display: flex;
   justify-content: center;
-  gap: var(--doc-gap);
 }
 
 .doc-content {
-  width: 100%;
-  max-width: var(--doc-width);
+  position: relative;
+  flex: 1 1 0;
   min-width: 0;
+}
+
+.doc-content-column {
+  margin: 0 auto;
+  max-width: var(--doc-width);
 }
 
 .doc-aside { display: none; }
 
+/* Aside mirrors FMHY/VitePress: a 256px floating box (32px gutter) holding a
+   fixed 224px rail that scrolls independently, with a fade curtain at bottom. */
 @media (min-width: 1280px) {
   .doc-aside {
     display: block;
-    flex: 0 0 var(--doc-aside-width);
-    width: var(--doc-aside-width);
+    position: relative;
+    order: 2;
+    flex-grow: 1;
+    width: 100%;
+    max-width: var(--doc-aside-box);
+    padding-left: 32px;
   }
   .doc-aside-inner {
-    position: sticky;
-    top: calc(var(--nav-height) + 48px);
-    max-height: calc(100vh - var(--nav-height) - 64px);
-    overflow-y: auto;
+    position: fixed;
+    top: 0;
+    width: var(--doc-aside-width);
+    height: 100vh;
+    padding-top: calc(var(--nav-height) + 48px);
     padding-bottom: 32px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+  }
+  .doc-aside-inner::-webkit-scrollbar { display: none; }
+  .doc-aside-curtain {
+    position: fixed;
+    bottom: 0;
+    z-index: 10;
+    width: var(--doc-aside-width);
+    height: 32px;
+    background: linear-gradient(transparent, var(--bg) 70%);
+    pointer-events: none;
   }
 }
 
 @media (min-width: 960px) {
   body.home-layout .app-sidebar { display: none; }
-  body.home-layout .doc-content { max-width: 1104px; }
+  body.home-layout .doc-content-column { max-width: 1104px; }
   body.home-layout .app-main { padding-inline: clamp(24px, 4vw, 48px); }
 }
 
@@ -353,16 +377,20 @@ summary:focus:not(:focus-visible),
   background-color: var(--accent);
 }
 
-/* ─── MOBILE NAV SCREEN (Matched to https://github.com/fmhy/edit) ────────── */
+/* ─── MOBILE NAV SCREEN (original full-height sheet, matched to FMHY) ────── */
 
 .VPNavScreen {
   position: fixed;
   top: var(--nav-height);
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: auto;
+  height: calc(100vh - var(--nav-height));
+  height: calc(100dvh - var(--nav-height));
   z-index: 290;
   background: var(--bg);
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 16px 20px 60px;
@@ -375,6 +403,55 @@ summary:focus:not(:focus-visible),
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Left-sheet drawer variant (wiki pages): slides in from the left over a
+   dimmed backdrop, revealing the desktop sidebar's own content. */
+.VPNavScreen--drawer {
+  top: 0;
+  bottom: auto;
+  right: auto;
+  width: calc(100vw - 64px);
+  max-width: 320px;
+  /* Fixed sheets sized only by top/bottom won't touch-scroll on some mobile
+     browsers — FMHY needed the same explicit-height override on VPSidebar. */
+  height: 100vh;
+  height: 100dvh;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-right: 1px solid var(--line);
+  box-shadow: var(--shadow-lg);
+  padding: calc(var(--nav-height) + 16px) 20px calc(96px + env(safe-area-inset-bottom, 0px));
+  animation: navScreenSlideIn 0.25s cubic-bezier(0.2, 0, 0, 1);
+}
+
+@keyframes navScreenSlideIn {
+  from { opacity: 0.4; transform: translateX(-100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.nav-screen-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 289;
+  background: var(--overlay);
+  animation: fade-in 0.2s var(--ease-standard);
+}
+
+/* Sidebar content transplanted into the left drawer (wiki pages). The desktop
+   scroll body brings its own height/padding — relax both to sit naturally
+   inside the drawer, which already owns the sheet padding. */
+.VPNavScreen--drawer .VPNavScreen-container {
+  max-width: 100%;
+  margin: 0;
+}
+.VPNavScreen--sidebar .fmhy-side-scroll {
+  height: auto;
+  overflow: visible;
+  touch-action: pan-y;
+  padding: 0 0 16px;
+}
+
 @media (min-width: 960px) {
   .VPNavScreen {
     display: none !important;
@@ -383,6 +460,138 @@ summary:focus:not(:focus-visible),
 
 body.nav-screen-open {
   overflow: hidden !important;
+}
+
+/* ─── LOCAL NAV (mobile wiki pages: burger left, "On this page" right) ───── */
+
+.VPLocalNav {
+  display: none;
+}
+
+@media (max-width: 959.98px) {
+  .VPLocalNav {
+    position: sticky;
+    top: var(--nav-height);
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 52px;
+    margin-inline: -20px;
+    padding-inline: 20px;
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 600px) {
+  .VPLocalNav {
+    margin-inline: -14px;
+    padding-inline: 14px;
+  }
+}
+
+.local-nav-menu {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: auto;
+  height: 38px;
+  padding: 0 12px 0 9px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.local-nav-menu:hover {
+  background: var(--surface);
+}
+
+.local-nav-label {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.local-nav-outline {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.local-nav-outline:hover {
+  background: var(--surface-raised);
+  color: var(--accent);
+  border-color: var(--line-bright);
+}
+.local-nav-outline svg:last-child {
+  transform: rotate(90deg);
+  color: var(--ink-faint);
+}
+
+/* ─── MOBILE "ON THIS PAGE" DROPDOWN ────────────────────────────────────── */
+
+.nav-outline-panel {
+  position: fixed;
+  top: calc(var(--nav-height) - 1px);
+  right: 10px;
+  z-index: 295;
+  width: 240px;
+  max-height: min(60vh, calc(100dvh - var(--nav-height) - 24px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  padding: 10px 0 6px;
+  animation: navScreenSlideIn 0.18s cubic-bezier(0.2, 0, 0, 1);
+}
+@media (min-width: 960px) {
+  .nav-outline-panel { display: none; }
+}
+
+.nav-outline-title {
+  padding: 4px 14px 8px;
+  color: var(--ink-faint);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.nav-outline-item {
+  display: block;
+  width: 100%;
+  padding: 9px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.nav-outline-item:hover {
+  color: var(--accent);
+  background: var(--surface-sunken);
 }
 
 .VPNavScreen-container {
@@ -1229,6 +1438,14 @@ body.nav-screen-open {
 .breadcrumb-item.current,
 .breadcrumb-item.current:visited { color: var(--ink-dim); }
 .breadcrumb-sep { color: var(--line-bright); }
+
+/* Mobile wiki browsing: no breadcrumb trail (Home / Wiki / Anime) — the fixed
+   navbar already carries the burger (left) and "On this page" (right). */
+@media (max-width: 959.98px) {
+  body[data-page="browse"] .breadcrumbs {
+    display: none;
+  }
+}
 
 .btn {
   display: inline-flex;
