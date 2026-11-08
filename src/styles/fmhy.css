@@ -1222,7 +1222,7 @@ body.nav-screen-open {
   gap: 6px;
   margin-bottom: 22px;
   color: var(--ink-faint);
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: 12px;
   line-height: 1.6;
 }
