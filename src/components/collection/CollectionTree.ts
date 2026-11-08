@@ -1,7 +1,7 @@
 import { el, headingIcon } from '../../utils/dom'
 import { icon } from '../../utils/icons'
 import { basePath } from '../../utils/router'
-import { formatStamp, parseTimestamp, shortDesc, stampLabel } from '../../utils/format'
+import { shortDesc } from '../../utils/format'
 import { renderInlineMarkdown } from '../../utils/markdown'
 import type { Category, Site, Subcategory } from '../../types'
 
@@ -44,29 +44,7 @@ function emitVisit(siteId: string) {
   window.dispatchEvent(new CustomEvent('cafs-visit', { detail: siteId }))
 }
 
-// Live-updating date stamp for a site: relative while fresh ("added 3m ago"),
-// full date + time + year once it ages ("updated 8 Nov 2026, 14:32"). The
-// ticker from format.ts keeps the label current without a re-render.
-export function siteTimestamp(site: Site): HTMLElement {
-  const addedTs = parseTimestamp(site.addedAt)
-  const updatedTs = parseTimestamp(site.updatedAt)
-  const isUpdate = updatedTs > addedTs
-  const dateStr = isUpdate ? site.updatedAt : site.addedAt
-  const verb = isUpdate ? 'updated' : 'added'
-
-  const span = el('span', { class: 'wiki-link-date' })
-  span.dataset.liveTs = dateStr
-  span.dataset.liveVerb = verb
-  span.title = `${isUpdate ? 'Updated' : 'Added'} ${formatStamp(dateStr)}`
-  span.textContent = `${verb} ${stampLabel(dateStr)}`
-  return span
-}
-
-export function CollectionSiteRow(
-  site: Site,
-  isFav: boolean,
-  opts: { stamp?: boolean } = {},
-): HTMLElement {
+export function CollectionSiteRow(site: Site, isFav: boolean): HTMLElement {
   const item = el('li', {
     class: 'wiki-link-item',
   })
@@ -98,8 +76,6 @@ export function CollectionSiteRow(
   const desc = el('span', { class: 'wiki-link-desc' })
   desc.innerHTML = ` – ${renderInlineMarkdown(shortDesc(site.description, 180))}`
   item.appendChild(desc)
-
-  if (opts.stamp) item.appendChild(siteTimestamp(site))
 
   const ext = el('a', {
     class: 'wiki-link-ext',

@@ -1082,16 +1082,6 @@ body.nav-screen-open {
   font-size: 16px;
 }
 
-.wiki-link-date {
-  color: var(--ink-faint);
-  font-size: 14px;
-  font-family: var(--font-mono);
-  white-space: nowrap;
-}
-.wiki-link-date:hover {
-  color: var(--ink-soft);
-}
-
 .wiki-link-fav {
   display: inline-flex;
   align-items: center;

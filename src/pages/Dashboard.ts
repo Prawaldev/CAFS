@@ -2,7 +2,6 @@ import { el } from '../utils/dom'
 import { StatCard } from '../components/stats/StatCard'
 import { TagCloud } from '../components/stats/TagCloud'
 import { Breadcrumbs } from '../components/ui/Breadcrumbs'
-import { siteTimestamp } from '../components/collection/CollectionTree'
 import { pluralize, siteRecency } from '../utils/format'
 import { basePath, navigate } from '../utils/router'
 import type { Site, Category } from '../types'
@@ -77,8 +76,6 @@ export function DashboardPage(sites: Site[], categories: Category[], recentIds?:
       window.dispatchEvent(new CustomEvent('cafs-visit', { detail: site.id }))
     })
     item.appendChild(link)
-    item.appendChild(el('span', { class: 'wiki-link-desc' }, ' – '))
-    item.appendChild(siteTimestamp(site))
     recentList.appendChild(item)
   })
   recentSection.appendChild(recentList)

@@ -119,11 +119,11 @@ export function HomePage(sites: Site[], categories: Category[], favIds: string[]
     latest.appendChild(el('p', { class: 'vp-features-intro' }, 'Recently added & updated'))
 
     // New additions and refreshed entries share one recency view; explicit
-    // dates win, entries look up their content file's last-modified time.
+    // dates in the markdown meta order the list.
     const list = el('ul', { class: 'wiki-link-list wiki-link-list-home' })
     const sorted = [...sites].sort((a, b) => siteRecency(b) - siteRecency(a)).slice(0, 12)
     sorted.forEach(site => {
-      list.appendChild(CollectionSiteRow(site, favIds.includes(site.id), { stamp: true }))
+      list.appendChild(CollectionSiteRow(site, favIds.includes(site.id)))
     })
     latest.appendChild(list)
 
