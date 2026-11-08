@@ -2,7 +2,8 @@ import { el } from '../utils/dom'
 import { StatCard } from '../components/stats/StatCard'
 import { TagCloud } from '../components/stats/TagCloud'
 import { Breadcrumbs } from '../components/ui/Breadcrumbs'
-import { pluralize, relativeTime } from '../utils/format'
+import { siteTimestamp } from '../components/collection/CollectionTree'
+import { pluralize, siteRecency } from '../utils/format'
 import { basePath, navigate } from '../utils/router'
 import type { Site, Category } from '../types'
 
@@ -58,7 +59,7 @@ export function DashboardPage(sites: Site[], categories: Category[], recentIds?:
     const aChanged = recentIds?.has(a.id) ?? false
     const bChanged = recentIds?.has(b.id) ?? false
     if (aChanged !== bChanged) return aChanged ? -1 : 1
-    return b.updatedAt.localeCompare(a.updatedAt)
+    return siteRecency(b) - siteRecency(a)
   }).slice(0, 8)
 
   const recentList = el('ul', { class: 'wiki-link-list' })
@@ -76,7 +77,8 @@ export function DashboardPage(sites: Site[], categories: Category[], recentIds?:
       window.dispatchEvent(new CustomEvent('cafs-visit', { detail: site.id }))
     })
     item.appendChild(link)
-    item.appendChild(el('span', { class: 'wiki-link-desc' }, ` – updated ${relativeTime(site.updatedAt)}`))
+    item.appendChild(el('span', { class: 'wiki-link-desc' }, ' – '))
+    item.appendChild(siteTimestamp(site))
     recentList.appendChild(item)
   })
   recentSection.appendChild(recentList)

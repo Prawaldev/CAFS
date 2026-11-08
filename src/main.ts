@@ -1,4 +1,3 @@
-import './styles/fonts.css'
 import './styles/tokens.css'
 import './styles/reset.css'
 import './styles/layout.css'
@@ -26,6 +25,7 @@ import { DashboardPage } from './pages/Dashboard'
 import { AboutPage } from './pages/About'
 import { loadCatalog } from './content/catalog'
 import { applyTheme, type DisplayMode } from './utils/theme'
+import { startLiveStamps } from './utils/format'
 
 const MOBILE_BREAKPOINT = 960
 
@@ -56,6 +56,7 @@ async function init() {
 
   document.documentElement.setAttribute('data-theme', state.theme)
   applySettings()
+  startLiveStamps()
 
   registerRoute(/^\/$/, () => {
     setCurrentPage('home')

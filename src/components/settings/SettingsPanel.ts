@@ -19,7 +19,7 @@ export function SettingsPanel(
   const panel = el('div', { class: 'settings-panel' })
 
   const header = el('div', { class: 'settings-header' })
-  header.innerHTML = `${icon('settings', 18)} <span>Appearance</span>`
+  header.innerHTML = `${icon('palette', 18)} <span>Appearance</span>`
   const closeBtn = el('button', { class: 'navbar-btn-icon', title: 'Close', 'aria-label': 'Close appearance settings' })
   closeBtn.innerHTML = icon('x', 16)
   closeBtn.addEventListener('click', () => callbacks.onClose())

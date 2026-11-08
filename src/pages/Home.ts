@@ -1,6 +1,6 @@
 import { el } from '../utils/dom'
 import { icon, icons } from '../utils/icons'
-import { pluralize } from '../utils/format'
+import { pluralize, siteRecency } from '../utils/format'
 import { renderInlineMarkdown } from '../utils/markdown'
 import { navigate, basePath } from '../utils/router'
 import { CollectionSiteRow } from '../components/collection/CollectionTree'
@@ -118,10 +118,12 @@ export function HomePage(sites: Site[], categories: Category[], favIds: string[]
     const latest = el('section', { class: 'vp-features vp-latest' })
     latest.appendChild(el('p', { class: 'vp-features-intro' }, 'Recently added & updated'))
 
+    // New additions and refreshed entries share one recency view; explicit
+    // dates win, entries look up their content file's last-modified time.
     const list = el('ul', { class: 'wiki-link-list wiki-link-list-home' })
-    const sorted = [...sites].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 12)
+    const sorted = [...sites].sort((a, b) => siteRecency(b) - siteRecency(a)).slice(0, 12)
     sorted.forEach(site => {
-      list.appendChild(CollectionSiteRow(site, favIds.includes(site.id)))
+      list.appendChild(CollectionSiteRow(site, favIds.includes(site.id), { stamp: true }))
     })
     latest.appendChild(list)
 

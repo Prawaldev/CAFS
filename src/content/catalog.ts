@@ -10,6 +10,15 @@ const categoryFiles = import.meta.glob('/docs/public/*.md', {
   eager: true,
 }) as Record<string, string>
 
+// Last-modified stamps straight from the content files (refreshed on every dev
+// edit and every build). Entries without their own `addedAt` / `updatedAt`
+// meta inherit their file's real timestamp instead of a fixed placeholder.
+const fileMtimes = import.meta.glob('/docs/public/*.md', {
+  query: '?mtime',
+  import: 'default',
+  eager: true,
+}) as Record<string, number>
+
 interface CategoryEntry {
   category: Category
   order: number
@@ -120,6 +129,7 @@ function parseResource(
   line: string,
   category: Category,
   subcategory: string,
+  fileMtime: number,
 ): { site: Site; order: number } {
   const link = /^\-\s+\[([^\]]+)\]\(([^)\s]+)\)/.exec(line)
   if (!link) fail(path, `invalid resource line: ${line}`)
@@ -144,6 +154,8 @@ function parseResource(
   const rawId = meta.id || slugify(name)
   if (!rawId) fail(path, `resource "${name}" is missing an id`)
 
+  const fallbackStamp = new Date(fileMtime).toISOString()
+
   const site: Site = {
     id: rawId,
     name,
@@ -157,8 +169,8 @@ function parseResource(
     requires: meta.requires || '',
     curatorNote: meta.curatorNote || '',
     featured: parseBoolean(meta.featured),
-    addedAt: meta.addedAt || '2025-01-01',
-    updatedAt: meta.updatedAt || '2025-06-01',
+    addedAt: meta.addedAt || fallbackStamp,
+    updatedAt: meta.updatedAt || fallbackStamp,
   }
 
   const order = meta.order === undefined
@@ -230,7 +242,7 @@ function loadSites(categories: Category[]): SiteEntry[] {
       }
 
       for (const line of section.lines) {
-        const { site, order } = parseResource(path, line, category, section.id)
+        const { site, order } = parseResource(path, line, category, section.id, fileMtimes[path] ?? 0)
         entries.push({
           site,
           order,

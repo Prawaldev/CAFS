@@ -127,7 +127,7 @@ export function Navbar(
     title: 'Appearance',
     'aria-label': 'Appearance settings',
   })
-  settingsBtn.innerHTML = icon('settings')
+  settingsBtn.innerHTML = icon('palette')
   settingsBtn.addEventListener('click', () => callbacks.onSettingsOpen?.())
   actions.appendChild(settingsBtn)
 

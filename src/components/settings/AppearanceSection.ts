@@ -13,6 +13,38 @@ export interface AppearanceSectionCallbacks {
   onChangePreset: (presetId: string | null) => void
 }
 
+// The settings overlay and the mobile nav screen render this section once and
+// never rebuild it, so a click must move its own highlight + check mark
+// instead of waiting for a re-render that never happens.
+function syncSelection(list: HTMLElement, selected: HTMLElement, checkClass: string): void {
+  Array.from(list.children).forEach(child => {
+    const item = child as HTMLElement
+    const active = item === selected
+    item.classList.toggle('active', active)
+    item.setAttribute('aria-pressed', active ? 'true' : 'false')
+
+    item.querySelectorAll(`.${checkClass}`).forEach(c => c.remove())
+    if (active) {
+      const isModeBtn = item.classList.contains('appearance-mode-btn')
+      const check = el('span', { class: checkClass })
+      check.innerHTML = icon('check', isModeBtn ? 14 : 12)
+      const holder = isModeBtn ? item : item.querySelector('.appearance-swatch-circle')
+      if (holder) holder.appendChild(check)
+    }
+  })
+}
+
+// Picking from one group deselects the other (a preset is replaced by a plain
+// color and vice versa) — clear the leftover highlights so they stay in sync.
+function clearSelections(list: HTMLElement): void {
+  Array.from(list.children).forEach(child => {
+    const item = child as HTMLElement
+    item.classList.remove('active')
+    item.setAttribute('aria-pressed', 'false')
+    item.querySelector('.appearance-swatch-check')?.remove()
+  })
+}
+
 export function AppearanceSection(
   currentMode: DisplayMode,
   currentColor: string,
@@ -53,6 +85,7 @@ export function AppearanceSection(
     btn.addEventListener('click', (e) => {
       e.stopPropagation()
       callbacks.onChangeMode(m.id)
+      syncSelection(modeList, btn, 'appearance-mode-check')
     })
     modeList.appendChild(btn)
   })
@@ -97,6 +130,10 @@ export function AppearanceSection(
       e.stopPropagation()
       callbacks.onChangePreset(null)
       callbacks.onChangeColor(c.id)
+      // presetGrid is declared later in this function; the closure only runs
+      // after the section finishes rendering, so the reference is valid here.
+      syncSelection(colorGrid, swatchBtn, 'appearance-swatch-check')
+      clearSelections(presetGrid)
     })
     colorGrid.appendChild(swatchBtn)
   })
@@ -141,6 +178,8 @@ export function AppearanceSection(
     presetBtn.addEventListener('click', (e) => {
       e.stopPropagation()
       callbacks.onChangePreset(p.id)
+      syncSelection(presetGrid, presetBtn, 'appearance-swatch-check')
+      clearSelections(colorGrid)
     })
     presetGrid.appendChild(presetBtn)
   })
