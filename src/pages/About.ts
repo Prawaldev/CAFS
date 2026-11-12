@@ -27,7 +27,7 @@ export function AboutPage(sites: Site[], categories: Category[]): HTMLElement {
     {
       title: 'What is this?',
       icon: 'info',
-      body: 'cafs is an archive and discovery hub, not a search engine. Think of it as a vetted collection: sites are reviewed before they are listed, and entries are trimmed when they stop being useful.',
+      body: 'cafs is an archive and discovery hub. Think of it as a vetted collection: sites are reviewed before they are listed, and entries are trimmed when they stop being useful.',
     },
     {
       title: 'How sites are curated',
