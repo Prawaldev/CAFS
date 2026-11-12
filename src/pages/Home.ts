@@ -19,6 +19,7 @@ const featureColors: Record<string, string> = {
   art: '#f17c67',
   games: '#dac9a6',
   nsfw: '#c4b5fd',
+  graveyard: '#9aa3b2',
 }
 
 const featureIcons: Record<string, keyof typeof icons> = {
@@ -34,6 +35,7 @@ const featureIcons: Record<string, keyof typeof icons> = {
   art: 'heart',
   games: 'grid3x3',
   nsfw: 'star',
+  graveyard: 'history',
 }
 
 export function HomePage(sites: Site[], categories: Category[], favIds: string[], _recentIds?: Set<string>): HTMLElement {

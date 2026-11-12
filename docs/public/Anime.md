@@ -51,7 +51,6 @@ subcategories:
 - [FireAnime](https://fireanime.net/) — Anime streaming site. <!-- tags: streaming; order: 233 -->
 - [AnimeNoSub](https://animenosub.to/) — Anime streaming without subtitles. <!-- tags: streaming, raw; order: 234 -->
 - [KimoiTV](https://kimoitv.com/) — Anime streaming site. <!-- tags: streaming; order: 235 -->
-- [Animo](https://animo.xyz/) — Modern anime streaming platform. <!-- tags: streaming; order: 236 -->
 - [1Anime](https://1anime.app/) — Multi-source anime streaming site. <!-- tags: streaming, multi; order: 237 -->
 - [Shiroko](https://shiroko.co/) — Multi-source anime streaming platform. <!-- tags: streaming, multi; order: 238 -->
 - [Bettermelon](https://bettermelon.org/) — Anime streaming site. <!-- tags: streaming; order: 239 -->
@@ -92,6 +91,7 @@ subcategories:
 - [aniwaves](https://aniwaves.ru/) — Anime streaming site. <!-- tags: streaming; order: 274 -->
 - [AV1 EnCodes](https://av1please.com/) — Anime streaming with AV1 encoding. <!-- tags: streaming, av1; order: 275 -->
 - [Hianime(Unofficial)](https://hianime.at/) — Anime streaming site. <!-- tags: streaming; order 275 -->
+- [Animesogo](https://animesogo.to/) — Modern anime streaming platform. <!-- tags: streaming; order: 276 -->
 
 ## Scrapers & Self-Hosted {#anime-scraper}
 
