@@ -1037,7 +1037,6 @@ body.nav-screen-open {
 }
 
 .vp-features { margin-top: 60px; }
-.vp-latest { margin-top: 56px; }
 
 .vp-features-intro {
   margin: 0 0 18px;
@@ -1105,11 +1104,6 @@ body.nav-screen-open {
   color: var(--accent);
   font-family: var(--font-body);
   font-size: 12px;
-}
-
-.vp-latest-more {
-  margin: 14px 0 0;
-  font-size: 16px;
 }
 
 /* ─── WIKI TYPOGRAPHY ───────────────────────────────────────────────────── */
@@ -2129,7 +2123,6 @@ body.home-layout .footer {
   }
 
   .vp-features { margin-top: 44px; }
-  .vp-latest { margin-top: 40px; }
   .vp-features-grid { grid-template-columns: 1fr; }
 
   .footer {

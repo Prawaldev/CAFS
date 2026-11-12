@@ -2,7 +2,7 @@ import { el } from '../utils/dom'
 import { StatCard } from '../components/stats/StatCard'
 import { TagCloud } from '../components/stats/TagCloud'
 import { Breadcrumbs } from '../components/ui/Breadcrumbs'
-import { pluralize, siteRecency } from '../utils/format'
+import { pluralize } from '../utils/format'
 import { basePath, navigate } from '../utils/router'
 import type { Site, Category } from '../types'
 
@@ -58,7 +58,7 @@ export function DashboardPage(sites: Site[], categories: Category[], recentIds?:
     const aChanged = recentIds?.has(a.id) ?? false
     const bChanged = recentIds?.has(b.id) ?? false
     if (aChanged !== bChanged) return aChanged ? -1 : 1
-    return siteRecency(b) - siteRecency(a)
+    return b.updatedAt.localeCompare(a.updatedAt)
   }).slice(0, 8)
 
   const recentList = el('ul', { class: 'wiki-link-list' })
