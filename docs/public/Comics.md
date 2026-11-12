@@ -19,8 +19,7 @@ subcategories:
 - [BatCave.biz](https://batcave.biz/) — DC and Marvel comic reader. <!-- id: batcavebiz; tags: reader, superhero; order: 76 -->
 - [Read Comic Online](https://readcomicsonline.ru/) — Large comic reading site. <!-- tags: reader, superhero; order: 77 -->
 - [Cineby](https://cineby.app/) — Western streaming site for movies and TV. <!-- tags: western, streaming, movies; order: 413 -->
-- [ShuttleTV](https://shuttletv.app/) — Western streaming platform. <!-- tags: western, streaming, tv; order: 414 -->
-- [HydraHD](https://hydrahd.net/) — Western HD streaming site. <!-- tags: western, streaming, hd; order: 415 -->
+- [ShuttleTV](https://shuttletv.app/) — Western streaming platform. <!-- tags: western, streaming, tv; order: 414 --
 - [NEPU Stream](https://neputo.xyz/) — Western content streaming. <!-- tags: western, streaming, movies; order: 416 -->
 - [M4uHD](https://m4uhd.tv/) — Free movie and TV streaming. <!-- tags: western, streaming, free; order: 417 -->
 - [Cinemaos](https://cinemaos.win/) — Western streaming site. <!-- tags: western, streaming; order: 418 -->
