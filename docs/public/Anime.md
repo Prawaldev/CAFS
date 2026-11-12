@@ -92,7 +92,7 @@ subcategories:
 - [AV1 EnCodes](https://av1please.com/) — Anime streaming with AV1 encoding. <!-- tags: streaming, av1; order: 275 -->
 - [Hianime(Unofficial)](https://hianime.at/) — Anime streaming site. <!-- tags: streaming; order 275 -->
 - [Animesogo](https://animesogo.to/) — Modern anime streaming platform. <!-- tags: streaming; order: 276 -->
-- [HydraHD](https://hydrahd.net/) — Western HD streaming site. <!-- tags: western, streaming, hd; order: 277 -->
+- [HydraHD](https://hydrahd.pw/) — Western HD streaming site. <!-- tags: western, streaming, hd; order: 277 -->
 
 ## Scrapers & Self-Hosted {#anime-scraper}
 
